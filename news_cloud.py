@@ -24,8 +24,6 @@ import sys
 import re
 import time
 import urllib.request
-import urllib.parse
-import urllib.error
 from datetime import datetime, timedelta
 
 # ============================================================
@@ -53,7 +51,7 @@ SOURCES = {
         "name": "今日头条热榜",
         "emoji": "📰",
         "type": "toutiao",
-        "sort_by": "index"
+        "sort_by": "hot_value"
     }
 }
 
@@ -301,13 +299,23 @@ def generate_markdown(all_news, summaries):
     md += f"> {today} 周{weekday} | 抖音{NEWS_COUNT_PER_SOURCE}条 + 头条{NEWS_COUNT_PER_SOURCE}条\n\n"
     md += "---\n\n"
 
-    # 抖音部分
+    # 抖音部分（分两个子区域）
     douyin_news = [n for n in all_news if n["source"] == "douyin"]
-    md += "## 🔥 抖音热点榜（按热度排序）\n\n"
-    for i, news in enumerate(douyin_news, 1):
+    douyin_hot = [n for n in douyin_news if n.get("douyin_type") == "最新最热"]
+    douyin_views = [n for n in douyin_news if n.get("douyin_type") == "热门作品"]
+
+    md += "## 🔥 抖音热点榜\n\n"
+    md += "**▸ 最新最热（按综合热度排序）**\n\n"
+    for i, news in enumerate(douyin_hot, 1):
         hot_str = f" `🔥{news.get('hot_display', '')}`" if news.get("hot_display") else ""
         summary = summaries.get(news["title"], news["title"])
-        md += f"**{i}. {news['title']}**{hot_str}\n{summary}\n\n"
+        md += f"**{i}. {news['title']}**{hot_str}\n{summary}\n[🔗 查看原文]({news['url']})\n\n"
+
+    md += "\n**▸ 热门作品（转发点赞最多）**\n\n"
+    for i, news in enumerate(douyin_views, 6):
+        hot_str = f" `🔥{news.get('hot_display', '')}`" if news.get("hot_display") else ""
+        summary = summaries.get(news["title"], news["title"])
+        md += f"**{i}. {news['title']}**{hot_str}\n{summary}\n[🔗 查看原文]({news['url']})\n\n"
 
     md += "---\n\n"
 
@@ -316,7 +324,7 @@ def generate_markdown(all_news, summaries):
     md += "## 📰 今日头条热榜（当日最新热度）\n\n"
     for i, news in enumerate(toutiao_news, 1):
         summary = summaries.get(news["title"], news["title"])
-        md += f"**{i}. {news['title']}**\n{summary}\n\n"
+        md += f"**{i}. {news['title']}**\n{summary}\n[🔗 查看原文]({news['url']})\n\n"
 
     md += "---\n\n"
     md += "*数据来源：抖音热点榜、今日头条热榜 | GitHub Actions 自动抓取去重生成*\n"
@@ -394,34 +402,71 @@ def main():
 
         news_list = fetch_hotlist(source_type, sort_by)
 
-        # 去重
-        unique_news = []
-        dup_count = 0
-        cross_dup = 0
-        for news in news_list:
-            if is_duplicate(news["title"], history):
-                dup_count += 1
-                continue
-            cross_dup_flag = False
-            for existing in all_news:
-                if titles_similar(news["title"], existing["title"]):
-                    cross_dup_flag = True
+        # 抖音特殊处理：双排序（前5最新最热 + 后5转发点赞最多）
+        if source_type == "douyin":
+            unique_news = []
+            dup_count = 0
+            cross_dup = 0
+            for news in news_list:
+                if is_duplicate(news["title"], history):
+                    dup_count += 1
+                    continue
+                cross_dup_flag = False
+                for existing in all_news:
+                    if titles_similar(news["title"], existing["title"]):
+                        cross_dup_flag = True
+                        break
+                if cross_dup_flag:
+                    cross_dup += 1
+                    continue
+                unique_news.append(news)
+
+            # 双排序：前5按热度，后5按浏览量（转发点赞）
+            hot_sorted = sorted(unique_news, key=lambda x: x["hot_value"], reverse=True)
+            top_hot = hot_sorted[:5]
+            hot_titles = {n["title"] for n in top_hot}
+            remaining = [n for n in unique_news if n["title"] not in hot_titles]
+            view_sorted = sorted(remaining, key=lambda x: x.get("view_count", 0), reverse=True)
+            top_views = view_sorted[:5]
+            final_douyin = top_hot + top_views
+
+            for i, news in enumerate(final_douyin):
+                news["source_name"] = source_name
+                news["source_emoji"] = source_config.get("emoji", "")
+                news["hot_display"] = format_hot_value(news["hot_value"])
+                news["douyin_type"] = "最新最热" if i < 5 else "热门作品"
+
+            log(f"{source_name}: 抓取 {len(news_list)} 条, 历史去重 {dup_count} 条, 跨来源去重 {cross_dup} 条, 最新最热 {len(top_hot)} 条 + 热门作品 {len(top_views)} 条 = 保留 {len(final_douyin)} 条")
+            all_news.extend(final_douyin)
+        else:
+            # 头条等来源：原有逻辑不变
+            unique_news = []
+            dup_count = 0
+            cross_dup = 0
+            for news in news_list:
+                if is_duplicate(news["title"], history):
+                    dup_count += 1
+                    continue
+                cross_dup_flag = False
+                for existing in all_news:
+                    if titles_similar(news["title"], existing["title"]):
+                        cross_dup_flag = True
+                        break
+                if cross_dup_flag:
+                    cross_dup += 1
+                    continue
+                unique_news.append(news)
+                if len(unique_news) >= NEWS_COUNT_PER_SOURCE:
                     break
-            if cross_dup_flag:
-                cross_dup += 1
-                continue
-            unique_news.append(news)
-            if len(unique_news) >= NEWS_COUNT_PER_SOURCE:
-                break
 
-        log(f"{source_name}: 抓取 {len(news_list)} 条, 历史去重 {dup_count} 条, 跨来源去重 {cross_dup} 条, 保留 {len(unique_news)} 条")
+            log(f"{source_name}: 抓取 {len(news_list)} 条, 历史去重 {dup_count} 条, 跨来源去重 {cross_dup} 条, 保留 {len(unique_news)} 条")
 
-        for news in unique_news:
-            news["source_name"] = source_name
-            news["source_emoji"] = source_config.get("emoji", "")
-            news["hot_display"] = format_hot_value(news["hot_value"])
+            for news in unique_news:
+                news["source_name"] = source_name
+                news["source_emoji"] = source_config.get("emoji", "")
+                news["hot_display"] = format_hot_value(news["hot_value"])
 
-        all_news.extend(unique_news)
+            all_news.extend(unique_news)
 
     if not all_news:
         log("错误: 没有获取到任何新闻")
@@ -457,7 +502,14 @@ def main():
                 "source": news.get("source", "")
             })
         save_history(history)
-        log("工作流执行完成，历史记录已更新")
+
+        # 清理中间文件（news_final.md 不再需要）
+        final_file = os.path.join(BASE_DIR, "news_final.md")
+        if os.path.exists(final_file):
+            os.remove(final_file)
+            log(f"已清理中间文件: {final_file}")
+
+        log("工作流执行完成，历史记录已更新，中间文件已清理")
     else:
         log("推送失败，历史记录未更新（下次运行会重新尝试）")
         sys.exit(1)
