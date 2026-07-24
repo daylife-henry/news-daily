@@ -52,6 +52,14 @@ SOURCES = {
         "emoji": "📰",
         "type": "toutiao",
         "sort_by": "hot_value"
+    },
+    "github": {
+        "name": "GitHub 热门项目",
+        "emoji": "⭐",
+        "type": "github",
+        "sort_by": "stars",
+        "days": 15,
+        "count": 10
     }
 }
 
@@ -207,6 +215,60 @@ def fetch_hotlist(source_type, sort_by="hot_value"):
     return news_list
 
 
+def fetch_github_trending(days=15, count=10):
+    """
+    从 GitHub Search API 抓取最近 N 天内 star 最多的项目。
+    使用 created:>YYYY-MM-DD 查询条件，按 stars 降序排列。
+    """
+    since_date = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
+    url = (
+        f"https://api.github.com/search/repositories"
+        f"?q=created:>{since_date}&sort=stars&order=desc&per_page={count}"
+    )
+
+    log(f"正在抓取 GitHub 热门项目（近{days}天）: {url}")
+    try:
+        req = urllib.request.Request(url, headers={
+            "User-Agent": "news-cloud-workflow",
+            "Accept": "application/vnd.github+json"
+        })
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+    except Exception as e:
+        log(f"抓取 GitHub 热门项目失败: {e}")
+        time.sleep(3)
+        try:
+            req = urllib.request.Request(url, headers={
+                "User-Agent": "news-cloud-workflow",
+                "Accept": "application/vnd.github+json"
+            })
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+        except Exception as e2:
+            log(f"重试抓取 GitHub 热门项目仍然失败: {e2}")
+            return []
+
+    items = data.get("items", [])
+    if not items:
+        log("GitHub 热门项目返回空数据")
+        return []
+
+    repos = []
+    for item in items:
+        repo = {
+            "title": item.get("full_name", ""),
+            "url": item.get("html_url", ""),
+            "description": item.get("description") or "",
+            "language": item.get("language") or "",
+            "stars": item.get("stargazers_count", 0),
+            "source": "github"
+        }
+        repos.append(repo)
+
+    log(f"成功抓取 GitHub 热门项目 {len(repos)} 个")
+    return repos
+
+
 # ============================================================
 # AI 归纳总结（DeepSeek）
 # ============================================================
@@ -286,6 +348,99 @@ def ai_summarize(news_list):
         return {n["title"]: n["title"] for n in news_list}
 
 
+def ai_explain_github(repos):
+    """
+    用 DeepSeek API 对 GitHub 项目做中文说明（≤50字）。
+    根据项目名称和描述，用中文解释项目主要作用。
+    如果没有 API key，直接使用 description（截断到50字）。
+    """
+    if not repos:
+        return {}
+
+    if not DEEPSEEK_API_KEY:
+        log("未配置 DEEPSEEK_API_KEY，GitHub 项目直接使用 description")
+        result = {}
+        for repo in repos:
+            desc = repo.get("description", "") or repo["title"]
+            if len(desc) > 50:
+                desc = desc[:50]
+            result[repo["title"]] = desc
+        return result
+
+    log(f"正在用 DeepSeek AI 对 {len(repos)} 个 GitHub 项目做中文说明...")
+
+    repo_lines = []
+    for i, repo in enumerate(repos, 1):
+        name = repo["title"]
+        desc = repo.get("description", "") or "无描述"
+        lang = repo.get("language", "")
+        lang_str = f" [{lang}]" if lang else ""
+        repo_lines.append(f"{i}. {name}{lang_str}: {desc}")
+
+    prompt = f"""请对以下{len(repos)}个GitHub开源项目逐一用中文解释其主要作用，每个解释不超过50个中文字。
+要求：简洁说明项目是做什么的，让不熟悉该项目的开发者也能快速理解。
+
+项目列表：
+{chr(10).join(repo_lines)}
+
+请严格按以下JSON格式返回，不要包含任何其他文字：
+{{"summaries": ["说明1", "说明2", ...]}}"""
+
+    payload = {
+        "model": "deepseek-chat",
+        "messages": [
+            {"role": "user", "content": prompt}
+        ],
+        "temperature": 0.3,
+        "max_tokens": 2000
+    }
+
+    try:
+        result = http_post_json(
+            "https://api.deepseek.com/chat/completions",
+            payload,
+            timeout=60,
+            headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}"}
+        )
+        content = result["choices"][0]["message"]["content"].strip()
+
+        if content.startswith("```"):
+            content = re.sub(r'^```(?:json)?\s*', '', content)
+            content = re.sub(r'\s*```$', '', content)
+
+        parsed = json.loads(content)
+        summaries = parsed.get("summaries", [])
+
+        if len(summaries) != len(repos):
+            log(f"警告: AI 返回 {len(summaries)} 条说明，期望 {len(repos)} 条，将按顺序匹配")
+
+        result_map = {}
+        for i, repo in enumerate(repos):
+            if i < len(summaries):
+                summary = summaries[i].strip()
+                if len(summary) > 50:
+                    summary = summary[:50]
+                result_map[repo["title"]] = summary
+            else:
+                desc = repo.get("description", "") or repo["title"]
+                if len(desc) > 50:
+                    desc = desc[:50]
+                result_map[repo["title"]] = desc
+
+        log(f"GitHub 项目说明完成，共 {len(result_map)} 条")
+        return result_map
+
+    except Exception as e:
+        log(f"GitHub 项目说明失败: {e}，将使用 description")
+        result = {}
+        for repo in repos:
+            desc = repo.get("description", "") or repo["title"]
+            if len(desc) > 50:
+                desc = desc[:50]
+            result[repo["title"]] = desc
+        return result
+
+
 # ============================================================
 # 生成 Markdown
 # ============================================================
@@ -295,8 +450,13 @@ def generate_markdown(all_news, summaries):
     weekdays = ["一", "二", "三", "四", "五", "六", "日"]
     weekday = weekdays[datetime.now().weekday()]
 
+    # 统计各来源条数
+    douyin_count = sum(1 for n in all_news if n["source"] == "douyin")
+    toutiao_count = sum(1 for n in all_news if n["source"] == "toutiao")
+    github_count = sum(1 for n in all_news if n["source"] == "github")
+
     md = f"# 📰 每日新闻日报\n\n"
-    md += f"> {today} 周{weekday} | 抖音{NEWS_COUNT_PER_SOURCE}条 + 头条{NEWS_COUNT_PER_SOURCE}条\n\n"
+    md += f"> {today} 周{weekday} | 抖音{douyin_count}条 + 头条{toutiao_count}条 + GitHub{github_count}个\n\n"
     md += "---\n\n"
 
     # 抖音部分（分两个子区域）
@@ -327,7 +487,21 @@ def generate_markdown(all_news, summaries):
         md += f"**{i}. {news['title']}**\n{summary}\n[🔗 查看原文]({news['url']})\n\n"
 
     md += "---\n\n"
-    md += "*数据来源：抖音热点榜、今日头条热榜 | GitHub Actions 自动抓取去重生成*\n"
+
+    # GitHub 热门项目部分
+    github_news = [n for n in all_news if n["source"] == "github"]
+    if github_news:
+        md += "## ⭐ GitHub 热门项目（近15天 star 最多）\n\n"
+        for i, news in enumerate(github_news, 1):
+            star_str = f" `⭐{news.get('hot_display', '')}`" if news.get("hot_display") else ""
+            summary = summaries.get(news["title"], news.get("description", news["title"]))
+            lang_str = ""
+            if news.get("language"):
+                lang_str = f" `{news['language']}`"
+            md += f"**{i}. {news['title']}**{star_str}{lang_str}\n{summary}\n[🔗 查看仓库]({news['url']})\n\n"
+        md += "---\n\n"
+
+    md += "*数据来源：抖音热点榜、今日头条热榜、GitHub Search API | GitHub Actions 自动抓取去重生成*\n"
 
     return md
 
@@ -399,6 +573,41 @@ def main():
         source_type = source_config["type"]
         source_name = source_config["name"]
         sort_by = source_config.get("sort_by", "index")
+
+        # GitHub 热门项目：使用 GitHub Search API
+        if source_type == "github":
+            gh_days = source_config.get("days", 15)
+            gh_count = source_config.get("count", NEWS_COUNT_PER_SOURCE)
+            news_list = fetch_github_trending(days=gh_days, count=gh_count * 2)
+
+            unique_news = []
+            dup_count = 0
+            cross_dup = 0
+            for news in news_list:
+                if is_duplicate(news["title"], history):
+                    dup_count += 1
+                    continue
+                cross_dup_flag = False
+                for existing in all_news:
+                    if titles_similar(news["title"], existing["title"]):
+                        cross_dup_flag = True
+                        break
+                if cross_dup_flag:
+                    cross_dup += 1
+                    continue
+                unique_news.append(news)
+                if len(unique_news) >= gh_count:
+                    break
+
+            log(f"{source_name}: 抓取 {len(news_list)} 个, 历史去重 {dup_count} 个, 跨来源去重 {cross_dup} 个, 保留 {len(unique_news)} 个")
+
+            for news in unique_news:
+                news["source_name"] = source_name
+                news["source_emoji"] = source_config.get("emoji", "")
+                news["hot_display"] = format_hot_value(news.get("stars", 0))
+
+            all_news.extend(unique_news)
+            continue
 
         news_list = fetch_hotlist(source_type, sort_by)
 
@@ -475,8 +684,13 @@ def main():
 
     log(f"共 {len(all_news)} 条新闻待处理")
 
-    # AI 归纳总结
-    summaries = ai_summarize(all_news)
+    # AI 归纳总结（新闻）+ GitHub 项目说明
+    news_items = [n for n in all_news if n["source"] != "github"]
+    github_items = [n for n in all_news if n["source"] == "github"]
+
+    summaries = ai_summarize(news_items)
+    github_summaries = ai_explain_github(github_items)
+    summaries.update(github_summaries)
 
     # 生成 Markdown
     markdown = generate_markdown(all_news, summaries)
