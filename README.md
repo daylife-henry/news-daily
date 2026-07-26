@@ -57,7 +57,7 @@ GitHub Actions 在云端服务器上每天定时运行 Python 脚本，自动抓
 
 **添加 PushPlus Token（必需）：**
 - Name: `PUSHPLUS_TOKEN`
-- Secret: `0bb909b5e8294f44af2c5edc64a427db`
+- Secret: `*********************************`
 - 点 **Add secret**
 
 **添加 DeepSeek API Key（可选，用于AI归纳总结）：**
