@@ -145,13 +145,79 @@ def format_github_date(iso_str):
         return iso_str[:10] if len(iso_str) >= 10 else iso_str
 
 
-def clean_readme(text, max_chars=2000):
-    """清理 README markdown 为纯文本摘要"""
+def is_metadata_line(line):
+    """
+    2026-07-26 | Henry | 判断是否为元数据噪音行
+    过滤掉 Language 列表、License、徽章、纯 URL、表格、统计行、多语言导航等非内容行
+    """
+    line = line.strip()
+    if not line:
+        return True
+    # 纯 URL 行
+    if re.match(r'^(https?://|www\.)', line, re.IGNORECASE):
+        return True
+    # 警告/注意类徽章前缀 [!WARNING] [!NOTE] 等
+    if re.match(r'^\[!(WARNING|NOTE|TIP|IMPORTANT|CAUTION)\]', line, re.IGNORECASE):
+        return True
+    # 已被剥掉 > 的引用块内容
+    if re.match(r'^(Official\s+sources|Note|Warning|Tip|Important|Caution|Disclaimer)\b', line, re.IGNORECASE):
+        return True
+    # "Read this in other languages" / "Available in" / "Translations" 等导航头
+    if re.search(r'\b(Read this in other languages|Available in|Translations?|Choose your language|Switch language)\b', line, re.IGNORECASE):
+        return True
+    # 多语言导航单行
+    if re.search(r'[/|]', line):
+        tokens = [t.strip() for t in re.split(r'[/|]', line) if t.strip()]
+        if len(tokens) >= 3:
+            short_tokens = [t for t in tokens if len(t) <= 12]
+            if len(short_tokens) / len(tokens) >= 0.6:
+                return True
+    # 多语言导航单元素行（多行格式的每行）
+    if re.match(r'^[\s\|]*(English|Português|简体中文|繁體中文|繁體|日本語|한국어|Türkçe|Русский|Tiếng\s*Việt|ไทย|Deutsch|Español|Français|Italiano|العربية|हिन्दी|Polski|Nederlands|Svenska|Українська)\s*\|?\s*$', line, re.IGNORECASE):
+        return True
+    if re.match(r'^\|\s*(English|Português|简体中文|繁體中文|繁體|日本語|한국어|Türkçe|Русский|Tiếng\s*Việt|ไทย|Deutsch|Español|Français|Italiano|العربية|हिन्दी|Polski|Nederlands|Svenska|Українська)\s*$', line, re.IGNORECASE):
+        return True
+    # License 信息行
+    if re.match(r'^License\s*[:|]', line, re.IGNORECASE):
+        return True
+    if re.search(r'\b(MIT|Apache|GPL|BSD|MPL|LGPL|ISC|Mozilla|Unlicense)\s+License\b', line, re.IGNORECASE):
+        return True
+    # Sponsor / Donate / Funding / 独家赞助
+    if re.match(r'^(Sponsor|Sponsor this|Donate|Funding|Backers?|Sponsors?|独家赞助)\b', line, re.IGNORECASE):
+        return True
+    # 导航行: 用 · 分隔的短段链接
+    if line.count('·') >= 2:
+        tokens = [t.strip() for t in line.split('·')]
+        if tokens and all(len(t) < 25 for t in tokens) and not re.search(r'[。.!]', line):
+            return True
+    # GitHub 统计行
+    if line.count('|') >= 2 and re.search(r'\b\d+[KkMmBb]?\+?\s*(stars?|forks?|contributors?|watchers?|issues?|pull\s*requests?|PRs?|downloads?|users?|dependents?|releases?|language\s+ecosystems?)\b', line, re.IGNORECASE):
+        return True
+    # 表格行（多 pipe 且所有段都短）
+    if line.count('|') >= 2:
+        tokens = [t.strip() for t in line.split('|')]
+        if tokens and all(len(t) < 30 for t in tokens):
+            return True
+    # 表格分隔行
+    if re.match(r'^[\s\-:|]+$', line) and '-' in line:
+        return True
+    # 太短
+    if len(line) < 3:
+        return True
+    return False
+
+
+def clean_readme(text, max_chars=4000):
+    """
+    2026-07-26 | Henry | 清理 README markdown 为纯文本摘要
+    去除 HTML 标签、图片、链接、代码块等格式，保留核心文字内容
+    """
     if not text:
         return ""
     text = re.sub(r'<[^>]+>', '', text)
-    text = re.sub(r'!\[.*?\]\(.*?\)', '', text)
     text = re.sub(r'\[!\[.*?\]\(.*?\)\]\(.*?\)', '', text)
+    text = re.sub(r'\[\s*\]\([^)]+\)', '', text)
+    text = re.sub(r'!\[.*?\]\(.*?\)', '', text)
     text = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', text)
     text = re.sub(r'```[\s\S]*?```', '', text)
     text = re.sub(r'`([^`]+)`', r'\1', text)
@@ -164,8 +230,17 @@ def clean_readme(text, max_chars=2000):
     text = re.sub(r'_{1,3}([^_]+)_{1,3}', r'\1', text)
     text = text.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&nbsp;', ' ')
     text = re.sub(r'\n{3,}', '\n\n', text)
-    lines = [line.strip() for line in text.split('\n')]
-    text = '\n'.join(lines).strip()
+    raw_lines = text.split('\n')
+    cleaned_lines = [line.strip() for line in raw_lines if not is_metadata_line(line)]
+    final_lines = []
+    prev_blank = False
+    for line in cleaned_lines:
+        is_blank = (line == '')
+        if is_blank and prev_blank:
+            continue
+        final_lines.append(line)
+        prev_blank = is_blank
+    text = '\n'.join(final_lines).strip()
     if len(text) > max_chars:
         text = text[:max_chars] + '...'
     return text
@@ -186,7 +261,7 @@ def fetch_github_readme(repo):
             with urllib.request.urlopen(req, timeout=10) as resp:
                 content = resp.read().decode("utf-8", errors="replace")
                 if content:
-                    return clean_readme(content, max_chars=2000)
+                    return clean_readme(content, max_chars=4000)
         except Exception:
             continue
     return ""
@@ -468,30 +543,59 @@ def ai_summarize(news_list):
         return {n["title"]: n["title"] for n in news_list}
 
 
+def _first_meaningful_line(text, max_len=40):
+    """从 README 摘要中提取第一句有意义的中文描述（≤max_len字）"""
+    if not text:
+        return ""
+    # 分行，跳过元数据噪音行
+    for line in text.split("\n"):
+        line = line.strip()
+        if not line:
+            continue
+        # 跳过常见的元数据/徽章起始
+        if re.match(r'^[\s\-=*#|>]+', line):
+            continue
+        if re.match(r'^(Language|License|Build|Made|Powered|Created|Written)\b', line, re.IGNORECASE):
+            continue
+        if line.count('|') >= 2:
+            continue
+        # 跳过纯符号/URL
+        if re.match(r'^(https?://|www\.)', line, re.IGNORECASE):
+            continue
+        if len(line) < 5:
+            continue
+        # 截到第一个句号/感叹号/问号
+        m = re.search(r'[。！？!?\.]', line)
+        if m:
+            sentence = line[:m.start() + 1].strip()
+        else:
+            sentence = line
+        if len(sentence) > max_len:
+            sentence = sentence[:max_len].rstrip("，,;；") + "。"
+        return sentence
+    return ""
+
+
 def ai_explain_github(repos):
-    """用 DeepSeek API 对 GitHub 项目做中文说明（≤50字），优先使用 README 摘要"""
+    """用 DeepSeek API 对 GitHub 项目做中文一句话高度概括（≤40字），优先使用 README 摘要"""
     if not repos:
         return {}
 
     if not DEEPSEEK_API_KEY:
-        log("未配置 DEEPSEEK_API_KEY，GitHub 项目直接使用 description/README")
+        log("未配置 DEEPSEEK_API_KEY，GitHub 项目使用 README/description 本地兜底")
         result = {}
         for repo in repos:
             readme_excerpt = repo.get("readme_excerpt", "")
             desc = repo.get("description", "")
-            # 优先用 README 摘要生成简洁说明
-            if readme_excerpt:
-                # 取第一行有意义的文字
-                lines = [l.strip() for l in readme_excerpt.split("\n") if l.strip()]
-                summary = lines[0] if lines else desc
-            else:
-                summary = desc or repo["title"]
-            if len(summary) > 50:
-                summary = summary[:50]
+            summary = _first_meaningful_line(readme_excerpt, max_len=40)
+            if not summary:
+                summary = (desc or repo["title"]).strip()
+                if len(summary) > 40:
+                    summary = summary[:40]
             result[repo["title"]] = summary
         return result
 
-    log(f"正在用 DeepSeek AI 对 {len(repos)} 个 GitHub 项目做中文说明...")
+    log(f"正在用 DeepSeek AI 对 {len(repos)} 个 GitHub 项目做中文一句话概括...")
 
     repo_lines = []
     for i, repo in enumerate(repos, 1):
@@ -500,15 +604,22 @@ def ai_explain_github(repos):
         lang_str = f" [{lang}]" if lang else ""
         readme_preview = ""
         if repo.get("readme_excerpt"):
-            readme_preview = repo["readme_excerpt"][:300]
+            readme_preview = repo["readme_excerpt"][:400]
         desc = repo.get("description") or ""
         info = f"描述: {desc}"
         if readme_preview:
             info += f"\n  README摘要: {readme_preview}"
         repo_lines.append(f"{i}. {name}{lang_str}: {info}")
 
-    prompt = f"""请对以下{len(repos)}个GitHub开源项目逐一用中文解释其主要作用，每个解释不超过50个中文字。
-要求：参考提供的README摘要内容，简洁说明项目是做什么的，让不熟悉该项目的开发者也能快速理解。
+    prompt = f"""请对以下{len(repos)}个GitHub开源项目逐一用中文做一句话高度概括，每个概括**严格控制在一句话以内，不超过40个中文字**。
+
+要求：
+- 必须是一句完整的中文话（以"。"或自然断句结尾），简洁说明项目是做什么的
+- 让不熟悉该项目的开发者也能一眼看懂核心功能
+- 优先参考README摘要中的核心描述
+- 不要包含 Language 徽章列表、License 信息、URL、徽章文本、表格内容
+- 不要写"这是一个..."、"该项目..."这种套话开头
+- 不要超过一句话
 
 项目列表：
 {chr(10).join(repo_lines)}
@@ -548,13 +659,17 @@ def ai_explain_github(repos):
         for i, repo in enumerate(repos):
             if i < len(summaries):
                 summary = summaries[i].strip()
-                if len(summary) > 50:
-                    summary = summary[:50]
+                # 截到第一个完整句号处
+                m = re.search(r'[。！？!?]', summary)
+                if m and m.start() < len(summary) - 1:
+                    summary = summary[:m.start() + 1]
+                if len(summary) > 40:
+                    summary = summary[:40].rstrip("，,;；") + "。"
                 result_map[repo["title"]] = summary
             else:
                 desc = repo.get("description") or repo["title"]
-                if len(desc) > 50:
-                    desc = desc[:50]
+                if len(desc) > 40:
+                    desc = desc[:40]
                 result_map[repo["title"]] = desc
 
         log(f"GitHub 项目说明完成，共 {len(result_map)} 条")
