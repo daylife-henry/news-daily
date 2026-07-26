@@ -37,6 +37,8 @@ from datetime import datetime, timedelta
 
 PUSHPLUS_TOKEN = os.environ.get("PUSHPLUS_TOKEN", "").strip()
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "").strip()
+# 注意：deepseek-chat 已于 2026-07-24 停用，迁移至 deepseek-v4-flash（默认非思考模式）
+DEEPSEEK_MODEL = "deepseek-v4-flash"
 
 API_BASE = "https://uapis.cn/api/v1/misc/hotboard"
 NEWS_COUNT_PER_SOURCE = 10
@@ -96,14 +98,26 @@ def http_get(url, timeout=20):
 def http_post_json(url, payload, timeout=30, headers=None):
     data = json.dumps(payload, ensure_ascii=False).encode("utf-8")
     hdrs = {
-        "Content-Type": "application/json",
+        "Content-Type": "application/json; charset=utf-8",
+        "Accept": "application/json",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
     }
     if headers:
         hdrs.update(headers)
     req = urllib.request.Request(url, data=data, headers=hdrs, method="POST")
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        body = ""
+        try:
+            body = e.read().decode("utf-8", errors="replace")
+        except Exception:
+            pass
+        msg = f"HTTP {e.code} {e.reason}"
+        if body:
+            msg += f" | 响应体: {body[:500]}"
+        raise RuntimeError(msg) from e
 
 
 def normalize_title(title):
@@ -478,6 +492,65 @@ def fetch_github_yearly_top(count=15):
 # AI 归纳总结（DeepSeek）
 # ============================================================
 
+def _deepseek_chat(prompt, max_tokens=2000, timeout=60):
+    """调用 DeepSeek API（OpenAI 兼容格式），返回 content 字符串；失败返回 None 并记录详细错误"""
+    if not DEEPSEEK_API_KEY:
+        return None
+    payload = {
+        "model": DEEPSEEK_MODEL,
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.3,
+        "max_tokens": max_tokens,
+        "stream": False,
+        "thinking": {"type": "disabled"}
+    }
+    try:
+        result = http_post_json(
+            "https://api.deepseek.com/chat/completions",
+            payload,
+            timeout=timeout,
+            headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}"}
+        )
+    except Exception as e:
+        log(f"DeepSeek API 调用失败: {e}")
+        return None
+    if not isinstance(result, dict):
+        log(f"DeepSeek API 返回非预期格式: {type(result)}")
+        return None
+    if "error" in result:
+        log(f"DeepSeek API 返回错误对象: {result['error']}")
+        return None
+    try:
+        content = result["choices"][0]["message"]["content"].strip()
+    except (KeyError, IndexError, TypeError) as e:
+        log(f"DeepSeek API 返回结构异常: {e} | 原始: {str(result)[:300]}")
+        return None
+    if not content:
+        log("DeepSeek API 返回空内容")
+        return None
+    return content
+
+
+def _parse_json_array(content, key):
+    """从 DeepSeek 返回的 content 解析 JSON 数组，失败返回 None"""
+    if content.startswith("```"):
+        content = re.sub(r'^```(?:json)?\s*', '', content)
+        content = re.sub(r'\s*```$', '', content)
+    try:
+        parsed = json.loads(content)
+    except json.JSONDecodeError as e:
+        log(f"DeepSeek 返回 JSON 解析失败: {e} | 原始前200字: {content[:200]}")
+        return None
+    if not isinstance(parsed, dict) or key not in parsed:
+        log(f"DeepSeek 返回缺少 '{key}' 字段 | 原始前200字: {content[:200]}")
+        return None
+    arr = parsed[key]
+    if not isinstance(arr, list):
+        log(f"DeepSeek 返回 '{key}' 非数组 | 原始前200字: {content[:200]}")
+        return None
+    return arr
+
+
 def ai_summarize(news_list):
     """用 DeepSeek API 对新闻列表做 ≤50字 归纳总结"""
     if not DEEPSEEK_API_KEY:
@@ -499,50 +572,31 @@ def ai_summarize(news_list):
 请严格按以下JSON格式返回，不要包含任何其他文字：
 {{"summaries": ["总结1", "总结2", ...]}}"""
 
-    payload = {
-        "model": "deepseek-chat",
-        "messages": [
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": 0.3,
-        "max_tokens": 2000
-    }
-
-    try:
-        result = http_post_json(
-            "https://api.deepseek.com/chat/completions",
-            payload,
-            timeout=60,
-            headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}"}
-        )
-        content = result["choices"][0]["message"]["content"].strip()
-
-        if content.startswith("```"):
-            content = re.sub(r'^```(?:json)?\s*', '', content)
-            content = re.sub(r'\s*```$', '', content)
-
-        parsed = json.loads(content)
-        summaries = parsed.get("summaries", [])
-
-        if len(summaries) != len(news_list):
-            log(f"警告: AI 返回 {len(summaries)} 条总结，期望 {len(news_list)} 条，将按顺序匹配")
-
-        result_map = {}
-        for i, news in enumerate(news_list):
-            if i < len(summaries):
-                summary = summaries[i].strip()
-                if len(summary) > 50:
-                    summary = summary[:50]
-                result_map[news["title"]] = summary
-            else:
-                result_map[news["title"]] = news["title"]
-
-        log(f"AI 总结完成，共 {len(result_map)} 条")
-        return result_map
-
-    except Exception as e:
-        log(f"AI 总结失败: {e}，将使用原标题")
+    content = _deepseek_chat(prompt, max_tokens=2000, timeout=60)
+    if content is None:
+        log("AI 总结失败: DeepSeek 调用异常，将使用原标题")
         return {n["title"]: n["title"] for n in news_list}
+
+    summaries = _parse_json_array(content, "summaries")
+    if summaries is None:
+        log("AI 总结失败: 解析异常，将使用原标题")
+        return {n["title"]: n["title"] for n in news_list}
+
+    if len(summaries) != len(news_list):
+        log(f"警告: AI 返回 {len(summaries)} 条总结，期望 {len(news_list)} 条，将按顺序匹配")
+
+    result_map = {}
+    for i, news in enumerate(news_list):
+        if i < len(summaries):
+            summary = summaries[i].strip()
+            if len(summary) > 50:
+                summary = summary[:50]
+            result_map[news["title"]] = summary
+        else:
+            result_map[news["title"]] = news["title"]
+
+    log(f"AI 总结完成，共 {len(result_map)} 条")
+    return result_map
 
 
 def _first_meaningful_line(text, max_len=40):
@@ -665,41 +719,31 @@ def _translate_batch_deepseek(repos, batch_size=10):
 请严格按以下JSON格式返回，不要包含任何其他文字：
 {{"translations": ["翻译1", "翻译2", ...]}}"""
 
-        payload = {
-            "model": "deepseek-chat",
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.3,
-            "max_tokens": 2000
-        }
-
-        try:
-            resp = http_post_json(
-                "https://api.deepseek.com/chat/completions",
-                payload,
-                timeout=60,
-                headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}"}
-            )
-            content = resp["choices"][0]["message"]["content"].strip()
-            if content.startswith("```"):
-                content = re.sub(r'^```(?:json)?\s*', '', content)
-                content = re.sub(r'\s*```$', '', content)
-            parsed = json.loads(content)
-            translations = parsed.get("translations", [])
-
-            for i, repo in enumerate(batch):
-                if i < len(translations):
-                    result[repo["title"]] = translations[i].strip()
-                else:
-                    result[repo["title"]] = repo["description"]
-
-            log(f"DeepSeek 翻译批次 {batch_num}/{total_batches} 完成 ({len(batch)} 条)")
-
-        except Exception as e:
-            log(f"DeepSeek 翻译批次 {batch_num}/{total_batches} 失败: {e}，用 Google Translate 兜底")
+        content = _deepseek_chat(prompt, max_tokens=2000, timeout=60)
+        if content is None:
+            log(f"DeepSeek 翻译批次 {batch_num}/{total_batches} 失败，用 Google Translate 兜底")
             for repo in batch:
                 translated = _translate_google(repo["description"])
                 result[repo["title"]] = translated if translated else repo["description"]
                 time.sleep(0.3)
+            continue
+
+        translations = _parse_json_array(content, "translations")
+        if translations is None:
+            log(f"DeepSeek 翻译批次 {batch_num}/{total_batches} 解析失败，用 Google Translate 兜底")
+            for repo in batch:
+                translated = _translate_google(repo["description"])
+                result[repo["title"]] = translated if translated else repo["description"]
+                time.sleep(0.3)
+            continue
+
+        for i, repo in enumerate(batch):
+            if i < len(translations):
+                result[repo["title"]] = translations[i].strip()
+            else:
+                result[repo["title"]] = repo["description"]
+
+        log(f"DeepSeek 翻译批次 {batch_num}/{total_batches} 完成 ({len(batch)} 条)")
 
     return result
 
