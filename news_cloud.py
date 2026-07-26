@@ -27,6 +27,7 @@ import re
 import time
 import glob as glob_module
 import urllib.request
+import urllib.error
 from datetime import datetime, timedelta
 
 # ============================================================
@@ -100,8 +101,16 @@ def http_post_json(url, payload, timeout=30, headers=None):
     if headers:
         hdrs.update(headers)
     req = urllib.request.Request(url, data=data, headers=hdrs, method="POST")
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return json.loads(resp.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        body = ""
+        try:
+            body = e.read().decode("utf-8", errors="replace")[:500]
+        except Exception:
+            pass
+        raise RuntimeError(f"HTTP {e.code} {e.reason} | body: {body}") from e
 
 
 def normalize_title(title):
@@ -476,6 +485,46 @@ def fetch_github_yearly_top(count=15):
 # AI 归纳总结（DeepSeek）
 # ============================================================
 
+def _deepseek_chat(prompt, max_tokens=2000, timeout=60, batch_label=""):
+    """调用 DeepSeek API，返回 content 字符串；失败返回 None 并记录详细错误"""
+    payload = {
+        "model": "deepseek-chat",
+        "messages": [{"role": "user", "content": prompt}],
+        "temperature": 0.3,
+        "max_tokens": max_tokens
+    }
+    try:
+        result = http_post_json(
+            "https://api.deepseek.com/chat/completions",
+            payload,
+            timeout=timeout,
+            headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}"}
+        )
+        if "error" in result:
+            log(f"DeepSeek API 返回错误{batch_label}: {result['error']}")
+            return None
+        content = result["choices"][0]["message"]["content"].strip()
+        if not content:
+            log(f"DeepSeek API 返回空内容{batch_label}")
+            return None
+        return content
+    except Exception as e:
+        log(f"DeepSeek API 调用异常{batch_label}: {type(e).__name__}: {e}")
+        return None
+
+
+def _github_fallback(repo):
+    """API 失败时的本地兜底：优先 README 首句，其次 description"""
+    readme_excerpt = repo.get("readme_excerpt", "")
+    desc = repo.get("description", "")
+    summary = _first_meaningful_line(readme_excerpt, max_len=40)
+    if not summary:
+        summary = (desc or repo["title"]).strip()
+        if len(summary) > 40:
+            summary = summary[:40]
+    return summary
+
+
 def ai_summarize(news_list):
     """用 DeepSeek API 对新闻列表做 ≤50字 归纳总结"""
     if not DEEPSEEK_API_KEY:
@@ -497,23 +546,11 @@ def ai_summarize(news_list):
 请严格按以下JSON格式返回，不要包含任何其他文字：
 {{"summaries": ["总结1", "总结2", ...]}}"""
 
-    payload = {
-        "model": "deepseek-chat",
-        "messages": [
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": 0.3,
-        "max_tokens": 2000
-    }
-
     try:
-        result = http_post_json(
-            "https://api.deepseek.com/chat/completions",
-            payload,
-            timeout=60,
-            headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}"}
-        )
-        content = result["choices"][0]["message"]["content"].strip()
+        content = _deepseek_chat(prompt, max_tokens=2000, timeout=60, batch_label="（新闻总结）")
+        if content is None:
+            log("AI 总结失败，将使用原标题")
+            return {n["title"]: n["title"] for n in news_list}
 
         if content.startswith("```"):
             content = re.sub(r'^```(?:json)?\s*', '', content)
@@ -577,41 +614,40 @@ def _first_meaningful_line(text, max_len=40):
 
 
 def ai_explain_github(repos):
-    """用 DeepSeek API 对 GitHub 项目做中文一句话高度概括（≤40字），优先使用 README 摘要"""
+    """用 DeepSeek API 对 GitHub 项目做中文一句话高度概括（≤40字），分批调用避免超时"""
     if not repos:
         return {}
 
     if not DEEPSEEK_API_KEY:
         log("未配置 DEEPSEEK_API_KEY，GitHub 项目使用 README/description 本地兜底")
-        result = {}
-        for repo in repos:
-            readme_excerpt = repo.get("readme_excerpt", "")
-            desc = repo.get("description", "")
-            summary = _first_meaningful_line(readme_excerpt, max_len=40)
-            if not summary:
-                summary = (desc or repo["title"]).strip()
-                if len(summary) > 40:
-                    summary = summary[:40]
-            result[repo["title"]] = summary
-        return result
+        return {repo["title"]: _github_fallback(repo) for repo in repos}
 
     log(f"正在用 DeepSeek AI 对 {len(repos)} 个 GitHub 项目做中文一句话概括...")
 
-    repo_lines = []
-    for i, repo in enumerate(repos, 1):
-        name = repo["title"]
-        lang = repo.get("language", "")
-        lang_str = f" [{lang}]" if lang else ""
-        readme_preview = ""
-        if repo.get("readme_excerpt"):
-            readme_preview = repo["readme_excerpt"][:400]
-        desc = repo.get("description") or ""
-        info = f"描述: {desc}"
-        if readme_preview:
-            info += f"\n  README摘要: {readme_preview}"
-        repo_lines.append(f"{i}. {name}{lang_str}: {info}")
+    BATCH_SIZE = 10
+    result_map = {}
 
-    prompt = f"""请对以下{len(repos)}个GitHub开源项目逐一用中文做一句话高度概括，每个概括**严格控制在一句话以内，不超过40个中文字**。
+    for batch_idx in range(0, len(repos), BATCH_SIZE):
+        batch = repos[batch_idx:batch_idx + BATCH_SIZE]
+        batch_num = batch_idx // BATCH_SIZE + 1
+        total_batches = (len(repos) + BATCH_SIZE - 1) // BATCH_SIZE
+        log(f"  处理第 {batch_num}/{total_batches} 批（{len(batch)} 个项目）...")
+
+        repo_lines = []
+        for i, repo in enumerate(batch, 1):
+            name = repo["title"]
+            lang = repo.get("language", "")
+            lang_str = f" [{lang}]" if lang else ""
+            readme_preview = ""
+            if repo.get("readme_excerpt"):
+                readme_preview = repo["readme_excerpt"][:400]
+            desc = repo.get("description") or ""
+            info = f"描述: {desc}"
+            if readme_preview:
+                info += f"\n  README摘要: {readme_preview}"
+            repo_lines.append(f"{i}. {name}{lang_str}: {info}")
+
+        prompt = f"""请对以下{len(batch)}个GitHub开源项目逐一用中文做一句话高度概括，每个概括**严格控制在一句话以内，不超过40个中文字**。
 
 要求：
 - 必须是一句完整的中文话（以"。"或自然断句结尾），简洁说明项目是做什么的
@@ -627,39 +663,35 @@ def ai_explain_github(repos):
 请严格按以下JSON格式返回，不要包含任何其他文字：
 {{"summaries": ["说明1", "说明2", ...]}}"""
 
-    payload = {
-        "model": "deepseek-chat",
-        "messages": [
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": 0.3,
-        "max_tokens": 3000
-    }
+        content = _deepseek_chat(prompt, max_tokens=1500, timeout=60,
+                                 batch_label=f"（第{batch_num}批）")
+        if content is None:
+            log(f"  第 {batch_num} 批 AI 调用失败，使用本地兜底")
+            for repo in batch:
+                result_map[repo["title"]] = _github_fallback(repo)
+            continue
 
-    try:
-        result = http_post_json(
-            "https://api.deepseek.com/chat/completions",
-            payload,
-            timeout=90,
-            headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}"}
-        )
-        content = result["choices"][0]["message"]["content"].strip()
-
+        # 清理 markdown 代码块包裹
         if content.startswith("```"):
             content = re.sub(r'^```(?:json)?\s*', '', content)
             content = re.sub(r'\s*```$', '', content)
 
-        parsed = json.loads(content)
-        summaries = parsed.get("summaries", [])
+        try:
+            parsed = json.loads(content)
+            summaries = parsed.get("summaries", [])
+        except json.JSONDecodeError as e:
+            log(f"  第 {batch_num} 批 JSON 解析失败: {e}")
+            log(f"  原始返回前200字: {content[:200]}")
+            for repo in batch:
+                result_map[repo["title"]] = _github_fallback(repo)
+            continue
 
-        if len(summaries) != len(repos):
-            log(f"警告: AI 返回 {len(summaries)} 条说明，期望 {len(repos)} 条，将按顺序匹配")
+        if len(summaries) != len(batch):
+            log(f"  警告: 第 {batch_num} 批 AI 返回 {len(summaries)} 条，期望 {len(batch)} 条，按顺序匹配")
 
-        result_map = {}
-        for i, repo in enumerate(repos):
+        for i, repo in enumerate(batch):
             if i < len(summaries):
                 summary = summaries[i].strip()
-                # 截到第一个完整句号处
                 m = re.search(r'[。！？!?]', summary)
                 if m and m.start() < len(summary) - 1:
                     summary = summary[:m.start() + 1]
@@ -667,29 +699,14 @@ def ai_explain_github(repos):
                     summary = summary[:40].rstrip("，,;；") + "。"
                 result_map[repo["title"]] = summary
             else:
-                desc = repo.get("description") or repo["title"]
-                if len(desc) > 40:
-                    desc = desc[:40]
-                result_map[repo["title"]] = desc
+                result_map[repo["title"]] = _github_fallback(repo)
 
-        log(f"GitHub 项目说明完成，共 {len(result_map)} 条")
-        return result_map
+        log(f"  第 {batch_num} 批完成，已获取 {min(len(summaries), len(batch))} 条说明")
+        if batch_idx + BATCH_SIZE < len(repos):
+            time.sleep(1)
 
-    except Exception as e:
-        log(f"GitHub 项目说明失败: {e}，将使用 description/README")
-        result = {}
-        for repo in repos:
-            readme_excerpt = repo.get("readme_excerpt", "")
-            desc = repo.get("description", "")
-            if readme_excerpt:
-                lines = [l.strip() for l in readme_excerpt.split("\n") if l.strip()]
-                summary = lines[0] if lines else desc
-            else:
-                summary = desc or repo["title"]
-            if len(summary) > 50:
-                summary = summary[:50]
-            result[repo["title"]] = summary
-        return result
+    log(f"GitHub 项目说明完成，共 {len(result_map)} 条")
+    return result_map
 
 
 # ============================================================
@@ -840,6 +857,18 @@ def main():
     if not PUSHPLUS_TOKEN:
         print("ERROR: PUSHPLUS_TOKEN is not set. Please configure it in GitHub Secrets.")
         sys.exit(1)
+
+    # 验证 DeepSeek API Key 是否可用
+    if DEEPSEEK_API_KEY:
+        log("正在验证 DeepSeek API Key...")
+        test_content = _deepseek_chat("请回复'OK'两个字母", max_tokens=10, timeout=15, batch_label="（验证）")
+        if test_content:
+            log(f"DeepSeek API Key 验证通过，返回: {test_content[:20]}")
+        else:
+            log("⚠️ DeepSeek API Key 验证失败！将使用本地兜底（标题/description）")
+            log("⚠️ 请检查 GitHub Secrets 中 DEEPSEEK_API_KEY 是否正确")
+    else:
+        log("未配置 DEEPSEEK_API_KEY，将使用标题/description 本地兜底")
 
     history = load_history()
     log(f"已加载历史记录: {len(history.get('sent_titles', []))} 条已发送标题")
