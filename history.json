@@ -6089,6 +6089,97 @@
       "normalized_title": "penecho/penecho",
       "url": "https://github.com/penecho/penecho",
       "source": "github"
+    },
+    {
+      "date": "2026-07-26",
+      "title": "第一视角记录台风红霞来袭",
+      "normalized_title": "第一视角记录台风红霞来袭",
+      "url": "https://www.douyin.com/search/%E7%AC%AC%E4%B8%80%E8%A7%86%E8%A7%92%E8%AE%B0%E5%BD%95%E5%8F%B0%E9%A3%8E%E7%BA%A2%E9%9C%9E%E6%9D%A5%E8%A2%AD?type=general",
+      "source": "douyin"
+    },
+    {
+      "date": "2026-07-26",
+      "title": "AI演员首次直播破次元",
+      "normalized_title": "ai演员首次直播破次元",
+      "url": "https://www.douyin.com/search/AI%E6%BC%94%E5%91%98%E9%A6%96%E6%AC%A1%E7%9B%B4%E6%92%AD%E7%A0%B4%E6%AC%A1%E5%85%83?type=general",
+      "source": "douyin"
+    },
+    {
+      "date": "2026-07-26",
+      "title": "古风妆造圆了我的江湖梦",
+      "normalized_title": "古风妆造圆了我的江湖梦",
+      "url": "https://www.douyin.com/search/%E5%8F%A4%E9%A3%8E%E5%A6%86%E9%80%A0%E5%9C%86%E4%BA%86%E6%88%91%E7%9A%84%E6%B1%9F%E6%B9%96%E6%A2%A6?type=general",
+      "source": "douyin"
+    },
+    {
+      "date": "2026-07-26",
+      "title": "xai-org/grok-build",
+      "normalized_title": "xai-org/grok-build",
+      "url": "https://github.com/xai-org/grok-build",
+      "source": "github"
+    },
+    {
+      "date": "2026-07-26",
+      "title": "Fei-Away/Codex-Dream-Skin",
+      "normalized_title": "fei-away/codex-dream-skin",
+      "url": "https://github.com/Fei-Away/Codex-Dream-Skin",
+      "source": "github"
+    },
+    {
+      "date": "2026-07-26",
+      "title": "unicity-aos/aos-ce",
+      "normalized_title": "unicity-aos/aos-ce",
+      "url": "https://github.com/unicity-aos/aos-ce",
+      "source": "github"
+    },
+    {
+      "date": "2026-07-26",
+      "title": "andrewyng/openworker",
+      "normalized_title": "andrewyng/openworker",
+      "url": "https://github.com/andrewyng/openworker",
+      "source": "github"
+    },
+    {
+      "date": "2026-07-26",
+      "title": "img2threejs/img2threejs",
+      "normalized_title": "img2threejs/img2threejs",
+      "url": "https://github.com/img2threejs/img2threejs",
+      "source": "github"
+    },
+    {
+      "date": "2026-07-26",
+      "title": "lopopolo/harness-engineering",
+      "normalized_title": "lopopolo/harness-engineering",
+      "url": "https://github.com/lopopolo/harness-engineering",
+      "source": "github"
+    },
+    {
+      "date": "2026-07-26",
+      "title": "DavidHDev/canvas-ui",
+      "normalized_title": "davidhdev/canvas-ui",
+      "url": "https://github.com/DavidHDev/canvas-ui",
+      "source": "github"
+    },
+    {
+      "date": "2026-07-26",
+      "title": "nyblnet/bento",
+      "normalized_title": "nyblnet/bento",
+      "url": "https://github.com/nyblnet/bento",
+      "source": "github"
+    },
+    {
+      "date": "2026-07-26",
+      "title": "Vincentwei1021/video-shotcraft",
+      "normalized_title": "vincentwei1021/video-shotcraft",
+      "url": "https://github.com/Vincentwei1021/video-shotcraft",
+      "source": "github"
+    },
+    {
+      "date": "2026-07-26",
+      "title": "penecho/penecho",
+      "normalized_title": "penecho/penecho",
+      "url": "https://github.com/penecho/penecho",
+      "source": "github"
     }
   ],
   "sent_titles": [
@@ -6952,6 +7043,19 @@
     "nyblnet/bento",
     "vincentwei1021/video-shotcraft",
     "penecho/penecho",
+    "xai-org/grok-build",
+    "fei-away/codex-dream-skin",
+    "unicity-aos/aos-ce",
+    "andrewyng/openworker",
+    "img2threejs/img2threejs",
+    "lopopolo/harness-engineering",
+    "davidhdev/canvas-ui",
+    "nyblnet/bento",
+    "vincentwei1021/video-shotcraft",
+    "penecho/penecho",
+    "第一视角记录台风红霞来袭",
+    "ai演员首次直播破次元",
+    "古风妆造圆了我的江湖梦",
     "xai-org/grok-build",
     "fei-away/codex-dream-skin",
     "unicity-aos/aos-ce",
