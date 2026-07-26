@@ -1,5 +1,18 @@
 # GitHub Actions 每日新闻工作流 - 设置指南
 
+## 功能概述
+
+自动化抓取四大数据源，AI 总结后推送到微信：
+
+| 数据源 | 数量 | 说明 |
+|--------|------|------|
+| 🔥 抖音热点榜 | 10条 | 前5最新最热 + 后5热门作品（转发点赞最多） |
+| 📰 今日头条热榜 | 10条 | 按热度排序 |
+| ⭐ GitHub 近15天热门 | 10个 | 渐进式日期扩展（15→30→45→60→90天）确保满10条 |
+| 🏆 GitHub 年度热门 | 15个 | 当前年份 star 最多，不做历史去重 |
+
+每条新闻包含 **更新时间**，每个 GitHub 项目包含 **最后推送日期** 和 **README 摘要**。
+
 ## 原理
 
 GitHub Actions 在云端服务器上每天定时运行 Python 脚本，自动抓取新闻、去重、推送到微信。你的电脑不需要开机。
@@ -33,7 +46,7 @@ GitHub Actions 在云端服务器上每天定时运行 Python 脚本，自动抓
 1. 点 **Add file** → **Create new file**
 2. 文件名输入：`.github/workflows/news-daily.yml`
 3. 把本地 `github_actions/.github/workflows/news-daily.yml` 的内容粘贴进去
-4. 点 **Commit changes`
+4. 点 **Commit changes**
 
 ### 第4步：配置 Secrets（密钥）
 
@@ -44,7 +57,7 @@ GitHub Actions 在云端服务器上每天定时运行 Python 脚本，自动抓
 
 **添加 PushPlus Token（必需）：**
 - Name: `PUSHPLUS_TOKEN`
-- Secret: `******************************************`
+- Secret: `0bb909b5e8294f44af2c5edc64a427db`
 - 点 **Add secret**
 
 **添加 DeepSeek API Key（可选，用于AI归纳总结）：**
@@ -52,8 +65,7 @@ GitHub Actions 在云端服务器上每天定时运行 Python 脚本，自动抓
 - Secret: 你的 DeepSeek API Key（见下方说明）
 - 点 **Add secret**
 
-> 如果不配置 DEEPSEEK_API_KEY，脚本会直接使用新闻标题（标题本身已在50字以内）。
-> 配置后，AI 会对每条新闻做更详细的50字归纳总结。
+> 如果不配置 DEEPSEEK_API_KEY，脚本会直接使用新闻标题或 GitHub description。配置后 AI 会对每条新闻做更准确的50字归纳总结。
 
 ### 第5步：启用 Actions
 
@@ -72,7 +84,7 @@ GitHub Actions 在云端服务器上每天定时运行 Python 脚本，自动抓
 
 ## DeepSeek API Key 获取方法（可选）
 
-DeepSeek 是国产AI大模型，注册即送免费额度，20条新闻每天消耗不到0.01元。
+DeepSeek 是国产AI大模���，注册即送免费额度，每次推送消耗不到0.01元。
 
 1. 访问 https://platform.deepseek.com/
 2. 注册登录（支持手机号）
@@ -99,14 +111,34 @@ DeepSeek 是国产AI大模型，注册即送免费额度，20条新闻每天消�
 | 18:00 | `0 10 * * *` |
 | 21:00 | `0 13 * * *` |
 
+## 去重机制
+
+- **30天历史去重**：同一标题30天内不重复推送
+- **跨来源去重**：抖音和头条有相同内容时只保留一条
+- **渐进式日期扩展**：GitHub 近15天不足时自动扩展到30→45→60→90天
+- **去重池补充**：三个月都耗尽后，从历史已推送项目中重新选取
+- **年度热门不做去重**：GitHub 年度热门每次都是 Top 15，不加入历史记录
+
 ## 文件说明
 
 | 文件 | 作用 |
 |------|------|
-| `news_cloud.py` | 主脚本：抓取+去重+AI总结+推送 |
+| `news_cloud.py` | 主脚本：抓取+去重+README获取+AI总结+推送 |
 | `.github/workflows/news-daily.yml` | GitHub Actions 定时任务配置 |
 | `history.json` | 历史去重记录（运行后自动生成并提交） |
-| `news_final.md` | 当天生成的新闻日报（运行后自动生成） |
+| `news_final.md` | 当天生成的新闻日报（推送后自动清理） |
+
+## 两个版本差异
+
+| 特性 | 本地版 (news_workflow.py) | 云端版 (news_cloud.py) |
+|------|--------------------------|------------------------|
+| 运行环境 | WorkBuddy Automation + 本地 Python | GitHub Actions + 云端 Python |
+| 配置方式 | config.json | GitHub Secrets 环境变量 |
+| 推送频率 | 每天4次（8/12/18/20点） | 每天1次（8点） |
+| AI 总结 | WorkBuddy AI 直接生成 | DeepSeek API（可选） |
+| 数据源 | 抖音+头条+GitHub近15天+年度热门 | 完全相同 |
+| README 摘要 | ✅ 前2000字 | ✅ 前2000字 |
+| 中间文件清理 | push成功后自动清理 | push成功后自动清理 |
 
 ## 注意事项
 
