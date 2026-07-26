@@ -9,15 +9,16 @@ GitHub Actions 版每日新闻工作流
   1. 从 uapis.cn 抓取抖音热榜（前5最新最热+后5热门作品）+ 头条热榜（按热度排序）
   2. 从 GitHub Search API 抓取近15天热门项目（渐进式扩展确保10条）+ 年度热门15个
   3. 与历史记录比对去重（30天）+ 跨来源去重
-  4. 获取 GitHub 项目 README 摘要（前2000字）
+  4. 获取 GitHub 项目 README 摘要（前2000字，日志参考）
   5. 可选：用 DeepSeek AI 对每条新闻做 ≤50字 归纳总结
-  6. 生成 Markdown 日报（含更新时间、README摘要）
-  7. 通过 PushPlus 推送到微信
-  8. 更新历史记录文件（由 GitHub Actions 自动提交回仓库）
+  6. GitHub 项目说明用 About(description)：中文直接用，英文翻译（DeepSeek批量/Google兜底）
+  7. 生成 Markdown 日报（含更新时间、项目说明）
+  8. 通过 PushPlus 推送到微信
+  9. 更新历史记录文件（由 GitHub Actions 自动提交回仓库）
 
 环境变量（在 GitHub Secrets 中配置）：
   PUSHPLUS_TOKEN    - PushPlus 推送 token（必需）
-  DEEPSEEK_API_KEY  - DeepSeek API 密钥（可选，没有则直接使用标题/description）
+  DEEPSEEK_API_KEY  - DeepSeek API 密钥（可选，用于新闻归纳 + 英文 description 翻译）
 """
 
 import json
@@ -27,6 +28,7 @@ import re
 import time
 import glob as glob_module
 import urllib.request
+import urllib.parse
 from datetime import datetime, timedelta
 
 # ============================================================
@@ -576,120 +578,130 @@ def _first_meaningful_line(text, max_len=40):
     return ""
 
 
-def ai_explain_github(repos):
-    """用 DeepSeek API 对 GitHub 项目做中文一句话高度概括（≤40字），优先使用 README 摘要"""
+def _has_chinese(text):
+    """判断文本是否包含中文字符"""
+    return bool(re.search(r'[\u4e00-\u9fff]', text or ""))
+
+
+def _translate_google(text, timeout=10):
+    """用 Google Translate 免费接口将英文翻译成中文（DeepSeek 不可用时的兜底）"""
+    if not text:
+        return ""
+    try:
+        encoded = urllib.parse.quote(text)
+        url = f"https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=zh&dt=t&q={encoded}"
+        data = http_get(url, timeout=timeout)
+        # 返回格式: [[["翻译片段","原文片段",...],...],...]
+        translated = "".join(seg[0] for seg in data[0] if seg[0])
+        return translated.strip()
+    except Exception as e:
+        log(f"Google Translate 翻译失败: {e}")
+        return ""
+
+
+def translate_github_descriptions(repos):
+    """用 GitHub About(description) 做项目说明：中文直接用，英文翻译成中文
+
+    - description 含中文 → 直接用
+    - description 纯英文 → DeepSeek 批量翻译（10个/批），失败则 Google Translate 兜底
+    - 无 description → 用仓库名
+    """
     if not repos:
         return {}
 
-    if not DEEPSEEK_API_KEY:
-        log("未配置 DEEPSEEK_API_KEY，GitHub 项目使用 README/description 本地兜底")
-        result = {}
-        for repo in repos:
-            readme_excerpt = repo.get("readme_excerpt", "")
-            desc = repo.get("description", "")
-            summary = _first_meaningful_line(readme_excerpt, max_len=40)
-            if not summary:
-                summary = (desc or repo["title"]).strip()
-                if len(summary) > 40:
-                    summary = summary[:40]
-            result[repo["title"]] = summary
+    result = {}
+    need_translate = []
+
+    for repo in repos:
+        desc = (repo.get("description") or "").strip()
+        title = repo["title"]
+        if not desc:
+            result[title] = title
+        elif _has_chinese(desc):
+            result[title] = desc
+        else:
+            need_translate.append(repo)
+
+    direct_count = len(repos) - len(need_translate)
+    log(f"GitHub 项目说明: {direct_count} 个中文/无描述直接用, {len(need_translate)} 个英文待翻译")
+
+    if not need_translate:
         return result
 
-    log(f"正在用 DeepSeek AI 对 {len(repos)} 个 GitHub 项目做中文一句话概括...")
+    if DEEPSEEK_API_KEY:
+        result.update(_translate_batch_deepseek(need_translate))
+    else:
+        log("未配置 DEEPSEEK_API_KEY，使用 Google Translate 翻译英文 description")
+        for repo in need_translate:
+            translated = _translate_google(repo["description"])
+            result[repo["title"]] = translated if translated else repo["description"]
+            time.sleep(0.3)
 
-    repo_lines = []
-    for i, repo in enumerate(repos, 1):
-        name = repo["title"]
-        lang = repo.get("language", "")
-        lang_str = f" [{lang}]" if lang else ""
-        readme_preview = ""
-        if repo.get("readme_excerpt"):
-            readme_preview = repo["readme_excerpt"][:400]
-        desc = repo.get("description") or ""
-        info = f"描述: {desc}"
-        if readme_preview:
-            info += f"\n  README摘要: {readme_preview}"
-        repo_lines.append(f"{i}. {name}{lang_str}: {info}")
+    return result
 
-    prompt = f"""请对以下{len(repos)}个GitHub开源项目逐一用中文做一句话高度概括，每个概括**严格控制在一句话以内，不超过40个中文字**。
 
+def _translate_batch_deepseek(repos, batch_size=10):
+    """用 DeepSeek API 批量翻译英文 description 为中文（10个/批）"""
+    result = {}
+    total_batches = (len(repos) + batch_size - 1) // batch_size
+
+    for batch_idx in range(total_batches):
+        start = batch_idx * batch_size
+        batch = repos[start:start + batch_size]
+        batch_num = batch_idx + 1
+
+        lines = []
+        for i, repo in enumerate(batch, 1):
+            lines.append(f"{i}. {repo['description']}")
+
+        prompt = f"""请将以下{len(batch)}条GitHub项目描述从英文翻译成中文。
 要求：
-- 必须是一句完整的中文话（以"。"或自然断句结尾），简洁说明项目是做什么的
-- 让不熟悉该项目的开发者也能一眼看懂核心功能
-- 优先参考README摘要中的核心描述
-- 不要包含 Language 徽章列表、License 信息、URL、徽章文本、表格内容
-- 不要写"这是一个..."、"该项目..."这种套话开头
-- 不要超过一句话
+- 简洁准确，保持原意，不要添加多余解释
+- 翻译后通常不超过50字
 
-项目列表：
-{chr(10).join(repo_lines)}
+描述列表：
+{chr(10).join(lines)}
 
 请严格按以下JSON格式返回，不要包含任何其他文字：
-{{"summaries": ["说明1", "说明2", ...]}}"""
+{{"translations": ["翻译1", "翻译2", ...]}}"""
 
-    payload = {
-        "model": "deepseek-chat",
-        "messages": [
-            {"role": "user", "content": prompt}
-        ],
-        "temperature": 0.3,
-        "max_tokens": 3000
-    }
+        payload = {
+            "model": "deepseek-chat",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.3,
+            "max_tokens": 2000
+        }
 
-    try:
-        result = http_post_json(
-            "https://api.deepseek.com/chat/completions",
-            payload,
-            timeout=90,
-            headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}"}
-        )
-        content = result["choices"][0]["message"]["content"].strip()
+        try:
+            resp = http_post_json(
+                "https://api.deepseek.com/chat/completions",
+                payload,
+                timeout=60,
+                headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}"}
+            )
+            content = resp["choices"][0]["message"]["content"].strip()
+            if content.startswith("```"):
+                content = re.sub(r'^```(?:json)?\s*', '', content)
+                content = re.sub(r'\s*```$', '', content)
+            parsed = json.loads(content)
+            translations = parsed.get("translations", [])
 
-        if content.startswith("```"):
-            content = re.sub(r'^```(?:json)?\s*', '', content)
-            content = re.sub(r'\s*```$', '', content)
+            for i, repo in enumerate(batch):
+                if i < len(translations):
+                    result[repo["title"]] = translations[i].strip()
+                else:
+                    result[repo["title"]] = repo["description"]
 
-        parsed = json.loads(content)
-        summaries = parsed.get("summaries", [])
+            log(f"DeepSeek 翻译批次 {batch_num}/{total_batches} 完成 ({len(batch)} 条)")
 
-        if len(summaries) != len(repos):
-            log(f"警告: AI 返回 {len(summaries)} 条说明，期望 {len(repos)} 条，将按顺序匹配")
+        except Exception as e:
+            log(f"DeepSeek 翻译批次 {batch_num}/{total_batches} 失败: {e}，用 Google Translate 兜底")
+            for repo in batch:
+                translated = _translate_google(repo["description"])
+                result[repo["title"]] = translated if translated else repo["description"]
+                time.sleep(0.3)
 
-        result_map = {}
-        for i, repo in enumerate(repos):
-            if i < len(summaries):
-                summary = summaries[i].strip()
-                # 截到第一个完整句号处
-                m = re.search(r'[。！？!?]', summary)
-                if m and m.start() < len(summary) - 1:
-                    summary = summary[:m.start() + 1]
-                if len(summary) > 40:
-                    summary = summary[:40].rstrip("，,;；") + "。"
-                result_map[repo["title"]] = summary
-            else:
-                desc = repo.get("description") or repo["title"]
-                if len(desc) > 40:
-                    desc = desc[:40]
-                result_map[repo["title"]] = desc
-
-        log(f"GitHub 项目说明完成，共 {len(result_map)} 条")
-        return result_map
-
-    except Exception as e:
-        log(f"GitHub 项目说明失败: {e}，将使用 description/README")
-        result = {}
-        for repo in repos:
-            readme_excerpt = repo.get("readme_excerpt", "")
-            desc = repo.get("description", "")
-            if readme_excerpt:
-                lines = [l.strip() for l in readme_excerpt.split("\n") if l.strip()]
-                summary = lines[0] if lines else desc
-            else:
-                summary = desc or repo["title"]
-            if len(summary) > 50:
-                summary = summary[:50]
-            result[repo["title"]] = summary
-        return result
+    return result
 
 
 # ============================================================
@@ -1025,7 +1037,7 @@ def main():
     summaries = ai_summarize(news_items)
 
     all_github = github_items + github_yearly_items
-    github_summaries = ai_explain_github(all_github)
+    github_summaries = translate_github_descriptions(all_github)
     summaries.update(github_summaries)
 
     # 生成 Markdown
