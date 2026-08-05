@@ -6,7 +6,7 @@ GitHub Actions 版每日新闻工作流
 在 GitHub Actions 中运行，无需本地电脑开机。
 
 功能：
-  1. 从 uapis.cn 抓取抖音热榜（前5最新最热+后5热门作品）+ 头条热榜（按热度排序）
+  1. 从 uapis.cn 抓取抖音热榜（前5最新最热+后5热门作品）+ 头条热榜（按热度排序）+ 小红书热点榜（前5最新最热+后5热门）
   2. 从 GitHub Search API 抓取近15天热门项目（渐进式扩展确保10条）+ 年度热门15个
   3. 与历史记录比对去重（30天）+ 跨来源去重
   4. 获取 GitHub 项目 README 摘要（前2000字，日志参考）
@@ -50,19 +50,25 @@ HISTORY_FILE = os.path.join(BASE_DIR, "history.json")
 SOURCES = {
     "douyin": {
         "name": "抖音热点榜",
-        "emoji": "🔥",
+        "emoji": "[热]",
         "type": "douyin",
         "sort_by": "hot_value"
     },
     "toutiao": {
         "name": "今日头条热榜",
-        "emoji": "📰",
+        "emoji": "[新]",
         "type": "toutiao",
+        "sort_by": "hot_value"
+    },
+    "xiaohongshu": {
+        "name": "小红书热点榜",
+        "emoji": "[红]",
+        "type": "xiaohongshu",
         "sort_by": "hot_value"
     },
     "github": {
         "name": "GitHub 热门项目",
-        "emoji": "⭐",
+        "emoji": "[星]",
         "type": "github",
         "sort_by": "stars",
         "days": 15,
@@ -70,11 +76,19 @@ SOURCES = {
     },
     "github_yearly": {
         "name": "GitHub 年度热门",
-        "emoji": "🏆",
+        "emoji": "[冠]",
         "type": "github_yearly",
         "sort_by": "stars",
         "count": 15
     }
+}
+
+# QSLO/60s 搜索关键词 API（免费，无需注册）
+SEARCH_KEYWORD_API = "https://60s.viki.moe/v2"
+SEARCH_KEYWORD_SOURCES = {
+    "douyin": {"name": "抖音", "emoji": "[热]", "endpoint": "douyin"},
+    "toutiao": {"name": "今日头条", "emoji": "[新]", "endpoint": "toutiao"},
+    "xiaohongshu": {"name": "小红书", "emoji": "[红]", "endpoint": "rednote"},
 }
 
 # ============================================================
@@ -350,10 +364,17 @@ def fetch_hotlist(source_type, sort_by="hot_value"):
         extra = item.get("extra", {})
 
         hot_num = 0
+        hot_display_raw = ""  # 保留原始热度字符串（如 "920.8w"）
         if isinstance(hot_value, (int, float)):
-            hot_num = hot_value
-        elif isinstance(hot_value, str) and hot_value.isdigit():
             hot_num = int(hot_value)
+        elif isinstance(hot_value, str):
+            # 处理 "920.8w" 格式
+            w_match = re.match(r'^([\d.]+)w$', hot_value.strip().lower())
+            if w_match:
+                hot_num = int(float(w_match.group(1)) * 10000)
+                hot_display_raw = hot_value.strip()
+            elif hot_value.strip().isdigit():
+                hot_num = int(hot_value.strip())
         elif extra.get("hot_value"):
             hot_num = extra.get("hot_value", 0)
 
@@ -361,6 +382,7 @@ def fetch_hotlist(source_type, sort_by="hot_value"):
             "title": title,
             "url": item.get("url", ""),
             "hot_value": hot_num,
+            "hot_display_raw": hot_display_raw,
             "view_count": extra.get("view_count", 0),
             "video_count": extra.get("video_count", 0),
             "index": item.get("index", 0),
@@ -749,21 +771,184 @@ def _translate_batch_deepseek(repos, batch_size=10):
 
 
 # ============================================================
+# 搜索关键词抓取与统计
+# ============================================================
+
+def fetch_search_keywords(source_key):
+    """从 QSLO/60s 抓取热搜关键词
+    
+    Args:
+        source_key: SEARCH_KEYWORD_SOURCES 的 key（douyin/toutiao/xiaohongshu）
+    
+    Returns:
+        list: 关键词列表 [{"keyword": "xxx", "hot_value": 123}, ...]
+    """
+    cfg = SEARCH_KEYWORD_SOURCES.get(source_key)
+    if not cfg:
+        return []
+    
+    url = f"{SEARCH_KEYWORD_API}/{cfg['endpoint']}"
+    try:
+        req = urllib.request.Request(url, headers={
+            "User-Agent": "Mozilla/5.0",
+            "Accept": "application/json"
+        })
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        
+        if data.get("code") != 200:
+            log(f"搜索关键词 [{cfg['name']}] 获取失败: {data.get('message', data)}")
+            return []
+        
+        items = data.get("data", [])
+        keywords = []
+        seen = set()
+        for item in items:
+            title = item.get("title", "").strip()
+            if not title or len(title) > 50:  # 过滤空和超长
+                continue
+            if title in seen:
+                continue
+            seen.add(title)
+            
+            # 热度值：douyin/toutiao 是 hot_value，xiaohongshu 是 score（如"920.8w"）
+            hot_val = item.get("hot_value", 0)
+            score = item.get("score", "")
+            
+            if isinstance(score, str) and score:
+                w_match = re.match(r'^([\d.]+)w$', score.strip().lower())
+                if w_match:
+                    hot_val = int(float(w_match.group(1)) * 10000)
+                else:
+                    try:
+                        hot_val = int(float(score))
+                    except (ValueError, TypeError):
+                        pass
+            
+            if isinstance(hot_val, int):
+                hot_val = int(hot_val)
+            
+            keywords.append({"keyword": title, "hot_value": hot_val})
+            if len(keywords) >= 20:
+                break
+        
+        log(f"搜索关键词 [{cfg['name']}]: 获取 {len(keywords)} 条")
+        return keywords
+        
+    except Exception as e:
+        log(f"搜索关键词 [{cfg['name']}] 抓取异常: {e}")
+        return []
+
+
+def accumulate_keywords(history, keywords_data):
+    """将本次搜索关键词写入 history.json
+    
+    Args:
+        history: 当前历史记录字典
+        keywords_data: {source_key: [{"keyword": "xx", "hot_value": 123}, ...]}
+    """
+    today = datetime.now().strftime("%Y-%m-%d")
+    
+    if "search_keywords" not in history:
+        history["search_keywords"] = []
+    
+    for source_key, kw_list in keywords_data.items():
+        if not kw_list:
+            continue
+        cfg = SEARCH_KEYWORD_SOURCES.get(source_key, {})
+        for kw in kw_list:
+            history["search_keywords"].append({
+                "date": today,
+                "source": source_key,
+                "source_name": cfg.get("name", source_key),
+                "keyword": kw["keyword"],
+                "hot_value": kw["hot_value"]
+            })
+    
+    # 清理 90 天前的数据，避免文件膨胀
+    cutoff = (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d")
+    history["search_keywords"] = [
+        k for k in history["search_keywords"]
+        if k["date"] >= cutoff
+    ]
+    
+    return history
+
+
+def get_5day_trending(history, top_n=6):
+    """统计近5天各平台热搜关键词频次，返回 top N
+    
+    Returns:
+        dict: {
+            "total_days": 实际统计天数,
+            "platforms": {source_key: [(keyword, count, max_hot_value), ...]}
+        }
+    """
+    cutoff = (datetime.now() - timedelta(days=5)).strftime("%Y-%m-%d")
+    
+    search_kws = history.get("search_keywords", [])
+    
+    # 按平台分组统计
+    platform_stats = {}  # {source_key: {keyword: {"count": n, "max_hot": v}}}
+    
+    for entry in search_kws:
+        if entry["date"] < cutoff:
+            continue
+        sk = entry["source"]
+        kw = entry["keyword"]
+        hv = entry.get("hot_value", 0)
+        
+        if sk not in platform_stats:
+            platform_stats[sk] = {}
+        
+        if kw not in platform_stats[sk]:
+            platform_stats[sk][kw] = {"count": 0, "max_hot": 0}
+        
+        platform_stats[sk][kw]["count"] += 1
+        platform_stats[sk][kw]["max_hot"] = max(platform_stats[sk][kw]["max_hot"], hv)
+    
+    # 排序取 top N + 计算实际统计天数
+    platforms = {}
+    date_set = set()
+    for sk, kw_dict in platform_stats.items():
+        sorted_kws = sorted(
+            kw_dict.items(),
+            key=lambda x: (x[1]["count"], x[1]["max_hot"]),
+            reverse=True
+        )
+        platforms[sk] = [
+            (kw, stats["count"], stats["max_hot"])
+            for kw, stats in sorted_kws[:top_n]
+        ]
+    
+    # 统计实际覆盖天数
+    for entry in search_kws:
+        if entry["date"] >= cutoff:
+            date_set.add(entry["date"])
+    
+    return {
+        "total_days": max(len(date_set), 1),
+        "platforms": platforms
+    }
+
+
+# ============================================================
 # 生成 Markdown
 # ============================================================
 
-def generate_markdown(all_news, summaries):
+def generate_markdown(all_news, summaries, trending_keywords=None):
     today = datetime.now().strftime("%Y年%m月%d日")
     weekdays = ["一", "二", "三", "四", "五", "六", "日"]
     weekday = weekdays[datetime.now().weekday()]
 
     douyin_count = sum(1 for n in all_news if n["source"] == "douyin")
     toutiao_count = sum(1 for n in all_news if n["source"] == "toutiao")
+    xhs_count = sum(1 for n in all_news if n["source"] == "xiaohongshu")
     github_count = sum(1 for n in all_news if n["source"] == "github")
     github_yearly_count = sum(1 for n in all_news if n["source"] == "github_yearly")
 
-    md = f"# 📰 每日新闻日报\n\n"
-    md += f"> {today} 周{weekday} | 抖音{douyin_count}条 + 头条{toutiao_count}条 + GitHub近15天{github_count}�� + 年度热门{github_yearly_count}个\n\n"
+    md = f"# [日报] 每日新闻日报\n\n"
+    md += f"> {today} 周{weekday} | 抖音{douyin_count}条 + 头条{toutiao_count}条 + 小红书{xhs_count}条 + GitHub近15天{github_count}个 + 年度热门{github_yearly_count}个\n\n"
     md += "---\n\n"
 
     # 抖音部分
@@ -772,44 +957,67 @@ def generate_markdown(all_news, summaries):
     douyin_views = [n for n in douyin_news if n.get("douyin_type") == "热门作品"]
 
     if douyin_news:
-        md += "## 🔥 抖音热点榜\n\n"
+        md += "## [热] 抖音热点榜\n\n"
         md += "**▸ 最新最热（按综合热度排序）**\n\n"
         for i, news in enumerate(douyin_hot, 1):
-            hot_str = f" `🔥{news.get('hot_display', '')}`" if news.get("hot_display") else ""
-            updated = f" `🕒{news.get('updated_at', '')}`" if news.get("updated_at") else ""
+            hot_str = f" [热]{news.get('hot_display', '')}" if news.get('hot_display') else ""
+            updated = f" [更]{news.get('updated_at', '')}" if news.get('updated_at') else ""
             summary = summaries.get(news["title"], news["title"])
-            md += f"**{i}. {news['title']}**{hot_str}{updated}\n{summary}\n[🔗 查看原文]({news['url']})\n\n"
+            md += f"**{i}. {news['title']}**{hot_str}{updated}\n{summary}\n[查看原文]({news['url']})\n\n"
 
         md += "\n**▸ 热门作品（转发点赞最多）**\n\n"
         for i, news in enumerate(douyin_views, 6):
-            hot_str = f" `🔥{news.get('hot_display', '')}`" if news.get("hot_display") else ""
-            updated = f" `🕒{news.get('updated_at', '')}`" if news.get("updated_at") else ""
+            hot_str = f" [热]{news.get('hot_display', '')}" if news.get('hot_display') else ""
+            updated = f" [更]{news.get('updated_at', '')}" if news.get('updated_at') else ""
             summary = summaries.get(news["title"], news["title"])
-            md += f"**{i}. {news['title']}**{hot_str}{updated}\n{summary}\n[🔗 查看原文]({news['url']})\n\n"
+            md += f"**{i}. {news['title']}**{hot_str}{updated}\n{summary}\n[查看原文]({news['url']})\n\n"
 
         md += "---\n\n"
 
     # 头条部分
     toutiao_news = [n for n in all_news if n["source"] == "toutiao"]
     if toutiao_news:
-        md += "## 📰 今日头条热榜（按热��排序）\n\n"
+        md += "## [新] 今日头条热榜（按热度排序）\n\n"
         for i, news in enumerate(toutiao_news, 1):
-            updated = f" `🕒{news.get('updated_at', '')}`" if news.get("updated_at") else ""
+            updated = f" [更]{news.get('updated_at', '')}" if news.get('updated_at') else ""
             summary = summaries.get(news["title"], news["title"])
-            md += f"**{i}. {news['title']}**{updated}\n{summary}\n[🔗 查看原文]({news['url']})\n\n"
+            md += f"**{i}. {news['title']}**{updated}\n{summary}\n[查看原文]({news['url']})\n\n"
+
+        md += "---\n\n"
+
+    # 小红书部分
+    xhs_news = [n for n in all_news if n["source"] == "xiaohongshu"]
+    xhs_hot = [n for n in xhs_news if n.get("douyin_type") == "最新最热"]
+    xhs_views = [n for n in xhs_news if n.get("douyin_type") == "热门作品"]
+
+    if xhs_news:
+        md += "## [红] 小红书热点榜\n\n"
+        md += "**▸ 最新最热（按综合热度排序）**\n\n"
+        for i, news in enumerate(xhs_hot, 1):
+            hot_str = f" [红]{news.get('hot_display', '')}" if news.get('hot_display') else ""
+            updated = f" [更]{news.get('updated_at', '')}" if news.get('updated_at') else ""
+            summary = summaries.get(news["title"], news["title"])
+            md += f"**{i}. {news['title']}**{hot_str}{updated}\n{summary}\n[查看原文]({news['url']})\n\n"
+
+        md += "\n**▸ 热门作品（按热度排序）**\n\n"
+        for i, news in enumerate(xhs_views, 6):
+            hot_str = f" [红]{news.get('hot_display', '')}" if news.get('hot_display') else ""
+            updated = f" [更]{news.get('updated_at', '')}" if news.get('updated_at') else ""
+            summary = summaries.get(news["title"], news["title"])
+            md += f"**{i}. {news['title']}**{hot_str}{updated}\n{summary}\n[查看原文]({news['url']})\n\n"
 
         md += "---\n\n"
 
     # GitHub 近15天
     github_news = [n for n in all_news if n["source"] == "github"]
     if github_news:
-        md += "## ⭐ GitHub 热门项目（近15天 star 最多）\n\n"
+        md += "## [星] GitHub 热门项目（近15天 star 最多）\n\n"
         for i, news in enumerate(github_news, 1):
-            star_str = f" `⭐{news.get('hot_display', '')}`" if news.get("hot_display") else ""
-            lang_str = f" `{news['language']}`" if news.get("language") else ""
-            pushed = f" `🕒{news.get('pushed_at_display', '')}`" if news.get("pushed_at_display") else ""
+            star_str = f" [星]{news.get('hot_display', '')}" if news.get("hot_display") else ""
+            lang_str = f" [{news['language']}]" if news.get("language") else ""
+            pushed = f" [更]{news.get('pushed_at_display', '')}" if news.get("pushed_at_display") else ""
             summary = summaries.get(news["title"], news.get("description", news["title"]))
-            md += f"**{i}. {news['title']}**{star_str}{lang_str}{pushed}\n{summary}\n[🔗 查看仓库]({news['url']})\n\n"
+            md += f"**{i}. {news['title']}**{star_str}{lang_str}{pushed}\n{summary}\n[查看仓库]({news['url']})\n\n"
 
         md += "---\n\n"
 
@@ -817,17 +1025,42 @@ def generate_markdown(all_news, summaries):
     github_yearly = [n for n in all_news if n["source"] == "github_yearly"]
     if github_yearly:
         year = datetime.now().year
-        md += f"## 🏆 GitHub 年度���门（{year} star 最多）\n\n"
+        md += f"## [冠] GitHub 年度热门（{year} star 最多）\n\n"
         for i, news in enumerate(github_yearly, 1):
-            star_str = f" `⭐{news.get('hot_display', '')}`" if news.get("hot_display") else ""
-            lang_str = f" `{news['language']}`" if news.get("language") else ""
-            pushed = f" `🕒{news.get('pushed_at_display', '')}`" if news.get("pushed_at_display") else ""
+            star_str = f" [星]{news.get('hot_display', '')}" if news.get("hot_display") else ""
+            lang_str = f" [{news['language']}]" if news.get("language") else ""
+            pushed = f" [更]{news.get('pushed_at_display', '')}" if news.get("pushed_at_display") else ""
             summary = summaries.get(news["title"], news.get("description", news["title"]))
-            md += f"**{i}. {news['title']}**{star_str}{lang_str}{pushed}\n{summary}\n[🔗 查看仓库]({news['url']})\n\n"
+            md += f"**{i}. {news['title']}**{star_str}{lang_str}{pushed}\n{summary}\n[查看仓库]({news['url']})\n\n"
 
         md += "---\n\n"
 
-    md += "*数据来源：抖音热点榜、今日头条热榜、GitHub Search API | GitHub Actions 自动抓取去重生成*\n"
+    # 近5天热搜关键词
+    if trending_keywords:
+        platforms_kw = trending_keywords.get("platforms", {})
+        total_days = trending_keywords.get("total_days", 1)
+        
+        md += "## [搜] 近5天大家都在搜\n\n"
+        md += "> 统计最近5天各平台热搜关键词出现频次，取前6个高频词\n\n"
+
+        for sk, kw_list in platforms_kw.items():
+            if not kw_list:
+                continue
+            cfg = SEARCH_KEYWORD_SOURCES.get(sk, {})
+            name = cfg.get("name", sk)
+            emoji = cfg.get("emoji", "")
+            md += f"### {emoji} {name}\n\n"
+            md += "| 排名 | 关键词 | 出现次数 | 最高热度 |\n"
+            md += "|------|--------|----------|----------|\n"
+            for rank, (kw, count, max_hot) in enumerate(kw_list, 1):
+                hot_display = format_hot_value(max_hot) if max_hot else "-"
+                md += f"| {rank} | {kw} | {count}次 | {hot_display} |\n"
+            md += "\n"
+
+        md += f"> 数据统计范围：近{total_days}天 | 关键词来自 QSLO/60s 搜索热榜\n\n"
+        md += "---\n\n"
+
+    md += "*数据来源：抖音热点榜、今日头条热榜、小红书热点榜、GitHub Search API | GitHub Actions 自动抓取去重生成*\n"
 
     return md
 
@@ -845,7 +1078,7 @@ def send_to_wechat(content):
     today = datetime.now().strftime("%Y年%m月%d日")
     weekdays = ["一", "二", "三", "四", "五", "六", "日"]
     weekday = weekdays[datetime.now().weekday()]
-    title = f"📰 每日新闻日报 - {today} 周{weekday}"
+    title = f"[日报] 每日新闻日报 - {today} 周{weekday}"
 
     payload = {
         "token": PUSHPLUS_TOKEN,
@@ -999,7 +1232,7 @@ def main():
             all_news.extend(unique_news)
             continue
 
-        # 抖音和头条
+        # 抖音、小红书和头条
         news_list = fetch_hotlist(source_type, sort_by)
 
         # 抖音特殊处理：双排序
@@ -1037,6 +1270,40 @@ def main():
 
             log(f"{source_name}: 抓取 {len(news_list)} 条, 历史去重 {dup_count} 条, 跨来源去重 {cross_dup} 条, 最新最热 {len(top_hot)} 条 + 热门作品 {len(top_views)} 条 = 保留 {len(final_douyin)} 条")
             all_news.extend(final_douyin)
+
+        # 小红书特殊处理：双排序（无view_count，按hot_value分两段）
+        elif source_type == "xiaohongshu":
+            unique_news = []
+            dup_count = 0
+            cross_dup = 0
+            for news in news_list:
+                if is_duplicate(news["title"], history):
+                    dup_count += 1
+                    continue
+                cross_dup_flag = False
+                for existing in all_news:
+                    if titles_similar(news["title"], existing["title"]):
+                        cross_dup_flag = True
+                        break
+                if cross_dup_flag:
+                    cross_dup += 1
+                    continue
+                unique_news.append(news)
+
+            hot_sorted = sorted(unique_news, key=lambda x: x["hot_value"], reverse=True)
+            top_hot = hot_sorted[:5]
+            remaining = [n for n in hot_sorted if n["title"] not in {t["title"] for t in top_hot}]
+            top_views = remaining[:5]
+            final_xhs = top_hot + top_views
+
+            for i, news in enumerate(final_xhs):
+                news["source_name"] = source_name
+                news["source_emoji"] = source_config.get("emoji", "")
+                news["hot_display"] = news.get("hot_display_raw") or format_hot_value(news["hot_value"])
+                news["douyin_type"] = "最新最热" if i < 5 else "热门作品"
+
+            log(f"{source_name}: 抓取 {len(news_list)} 条, 历史去重 {dup_count} 条, 跨来源去重 {cross_dup} 条, 最新最热 {len(top_hot)} 条 + 热门作品 {len(top_views)} 条 = 保留 {len(final_xhs)} 条")
+            all_news.extend(final_xhs)
         else:
             unique_news = []
             dup_count = 0
@@ -1084,8 +1351,25 @@ def main():
     github_summaries = translate_github_descriptions(all_github)
     summaries.update(github_summaries)
 
+    # 抓取各平台搜索关键词
+    log("--- 抓取各平台搜索关键词 ---")
+    keywords_data = {}
+    for sk in SEARCH_KEYWORD_SOURCES:
+        kws = fetch_search_keywords(sk)
+        if kws:
+            keywords_data[sk] = kws
+
+    # 近5天趋势统计
+    trending_keywords = get_5day_trending(history)
+    platforms_kw = trending_keywords.get("platforms", {})
+    if platforms_kw:
+        total_kw = sum(len(v) for v in platforms_kw.values())
+        log(f"近5天热搜关键词: {total_kw} 个词（{len(platforms_kw)} 个平台）")
+    else:
+        log("暂无近5天关键词数据（首次运行或首次积累中）")
+
     # 生成 Markdown
-    markdown = generate_markdown(all_news, summaries)
+    markdown = generate_markdown(all_news, summaries, trending_keywords)
 
     output_file = os.path.join(BASE_DIR, "news_final.md")
     with open(output_file, "w", encoding="utf-8") as f:
@@ -1113,6 +1397,10 @@ def main():
             })
             added_count += 1
         save_history(history)
+        # 积累搜索关键词
+        if keywords_data:
+            history = accumulate_keywords(history, keywords_data)
+            save_history(history)
         if skipped_yearly:
             log(f"已更新历史记录: 新增 {added_count} 条（跳过 {skipped_yearly} 条年度热门）")
         else:

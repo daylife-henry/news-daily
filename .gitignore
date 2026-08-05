@@ -1,0 +1,18 @@
+# 2026-08-05 Henry 创建：git 忽略规则，排除私有目录与临时产物
+# 目的：用 WorkBuddy 提交代码时，自动跳过以下文件，不推送到公开仓库
+
+# WorkBuddy 本地记忆与配置（含个人偏好、工作日志，属私有数据，不提交）
+.workbuddy/
+
+# 运行残留文件（推送成功后脚本自动清理，仅本地临时产物，不提交）
+news_final.md
+
+# 临时截图与图片（如 Clipboard_Screenshot.png 等）
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# Python 缓存
+__pycache__/
+*.pyc
