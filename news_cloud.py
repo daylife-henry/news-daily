@@ -50,25 +50,25 @@ HISTORY_FILE = os.path.join(BASE_DIR, "history.json")
 SOURCES = {
     "douyin": {
         "name": "抖音热点榜",
-        "emoji": "[热]",
+        "emoji": "🔥",
         "type": "douyin",
         "sort_by": "hot_value"
     },
     "toutiao": {
         "name": "今日头条热榜",
-        "emoji": "[新]",
+        "emoji": "📰",
         "type": "toutiao",
         "sort_by": "hot_value"
     },
     "xiaohongshu": {
         "name": "小红书热点榜",
-        "emoji": "[红]",
+        "emoji": "📕",
         "type": "xiaohongshu",
         "sort_by": "hot_value"
     },
     "github": {
         "name": "GitHub 热门项目",
-        "emoji": "[星]",
+        "emoji": "⭐",
         "type": "github",
         "sort_by": "stars",
         "days": 15,
@@ -76,7 +76,7 @@ SOURCES = {
     },
     "github_yearly": {
         "name": "GitHub 年度热门",
-        "emoji": "[冠]",
+        "emoji": "🏆",
         "type": "github_yearly",
         "sort_by": "stars",
         "count": 15
@@ -86,9 +86,9 @@ SOURCES = {
 # QSLO/60s 搜索关键词 API（免费，无需注册）
 SEARCH_KEYWORD_API = "https://60s.viki.moe/v2"
 SEARCH_KEYWORD_SOURCES = {
-    "douyin": {"name": "抖音", "emoji": "[热]", "endpoint": "douyin"},
-    "toutiao": {"name": "今日头条", "emoji": "[新]", "endpoint": "toutiao"},
-    "xiaohongshu": {"name": "小红书", "emoji": "[红]", "endpoint": "rednote"},
+    "douyin": {"name": "抖音", "emoji": "🔥", "endpoint": "douyin"},
+    "toutiao": {"name": "今日头条", "emoji": "📰", "endpoint": "toutiao"},
+    "xiaohongshu": {"name": "小红书", "emoji": "📕", "endpoint": "rednote"},
 }
 
 # ============================================================
@@ -947,7 +947,7 @@ def generate_markdown(all_news, summaries, trending_keywords=None):
     github_count = sum(1 for n in all_news if n["source"] == "github")
     github_yearly_count = sum(1 for n in all_news if n["source"] == "github_yearly")
 
-    md = f"# [日报] 每日新闻日报\n\n"
+    md = f"# 📰 每日新闻日报\n\n"
     md += f"> {today} 周{weekday} | 抖音{douyin_count}条 + 头条{toutiao_count}条 + 小红书{xhs_count}条 + GitHub近15天{github_count}个 + 年度热门{github_yearly_count}个\n\n"
     md += "---\n\n"
 
@@ -957,31 +957,31 @@ def generate_markdown(all_news, summaries, trending_keywords=None):
     douyin_views = [n for n in douyin_news if n.get("douyin_type") == "热门作品"]
 
     if douyin_news:
-        md += "## [热] 抖音热点榜\n\n"
+        md += "## 🔥 抖音热点榜\n\n"
         md += "**▸ 最新最热（按综合热度排序）**\n\n"
         for i, news in enumerate(douyin_hot, 1):
-            hot_str = f" [热]{news.get('hot_display', '')}" if news.get('hot_display') else ""
-            updated = f" [更]{news.get('updated_at', '')}" if news.get('updated_at') else ""
+            hot_str = f" 🔥{news.get('hot_display', '')}" if news.get('hot_display') else ""
+            updated = f" 🕒{news.get('updated_at', '')}" if news.get('updated_at') else ""
             summary = summaries.get(news["title"], news["title"])
-            md += f"**{i}. {news['title']}**{hot_str}{updated}\n{summary}\n[查看原文]({news['url']})\n\n"
+            md += f"**{i}. {news['title']}**{hot_str}{updated}\n{summary}\n[🔗 查看原文]({news['url']})\n\n"
 
         md += "\n**▸ 热门作品（转发点赞最多）**\n\n"
         for i, news in enumerate(douyin_views, 6):
-            hot_str = f" [热]{news.get('hot_display', '')}" if news.get('hot_display') else ""
-            updated = f" [更]{news.get('updated_at', '')}" if news.get('updated_at') else ""
+            hot_str = f" 🔥{news.get('hot_display', '')}" if news.get('hot_display') else ""
+            updated = f" 🕒{news.get('updated_at', '')}" if news.get('updated_at') else ""
             summary = summaries.get(news["title"], news["title"])
-            md += f"**{i}. {news['title']}**{hot_str}{updated}\n{summary}\n[查看原文]({news['url']})\n\n"
+            md += f"**{i}. {news['title']}**{hot_str}{updated}\n{summary}\n[🔗 查看原文]({news['url']})\n\n"
 
         md += "---\n\n"
 
     # 头条部分
     toutiao_news = [n for n in all_news if n["source"] == "toutiao"]
     if toutiao_news:
-        md += "## [新] 今日头条热榜（按热度排序）\n\n"
+        md += "## 📰 今日头条热榜（按热度排序）\n\n"
         for i, news in enumerate(toutiao_news, 1):
-            updated = f" [更]{news.get('updated_at', '')}" if news.get('updated_at') else ""
+            updated = f" 🕒{news.get('updated_at', '')}" if news.get('updated_at') else ""
             summary = summaries.get(news["title"], news["title"])
-            md += f"**{i}. {news['title']}**{updated}\n{summary}\n[查看原文]({news['url']})\n\n"
+            md += f"**{i}. {news['title']}**{updated}\n{summary}\n[🔗 查看原文]({news['url']})\n\n"
 
         md += "---\n\n"
 
@@ -991,33 +991,33 @@ def generate_markdown(all_news, summaries, trending_keywords=None):
     xhs_views = [n for n in xhs_news if n.get("douyin_type") == "热门作品"]
 
     if xhs_news:
-        md += "## [红] 小红书热点榜\n\n"
+        md += "## 📕 小红书热点榜\n\n"
         md += "**▸ 最新最热（按综合热度排序）**\n\n"
         for i, news in enumerate(xhs_hot, 1):
-            hot_str = f" [红]{news.get('hot_display', '')}" if news.get('hot_display') else ""
-            updated = f" [更]{news.get('updated_at', '')}" if news.get('updated_at') else ""
+            hot_str = f" 📕{news.get('hot_display', '')}" if news.get('hot_display') else ""
+            updated = f" 🕒{news.get('updated_at', '')}" if news.get('updated_at') else ""
             summary = summaries.get(news["title"], news["title"])
-            md += f"**{i}. {news['title']}**{hot_str}{updated}\n{summary}\n[查看原文]({news['url']})\n\n"
+            md += f"**{i}. {news['title']}**{hot_str}{updated}\n{summary}\n[🔗 查看原文]({news['url']})\n\n"
 
         md += "\n**▸ 热门作品（按热度排序）**\n\n"
         for i, news in enumerate(xhs_views, 6):
-            hot_str = f" [红]{news.get('hot_display', '')}" if news.get('hot_display') else ""
-            updated = f" [更]{news.get('updated_at', '')}" if news.get('updated_at') else ""
+            hot_str = f" 📕{news.get('hot_display', '')}" if news.get('hot_display') else ""
+            updated = f" 🕒{news.get('updated_at', '')}" if news.get('updated_at') else ""
             summary = summaries.get(news["title"], news["title"])
-            md += f"**{i}. {news['title']}**{hot_str}{updated}\n{summary}\n[查看原文]({news['url']})\n\n"
+            md += f"**{i}. {news['title']}**{hot_str}{updated}\n{summary}\n[🔗 查看原文]({news['url']})\n\n"
 
         md += "---\n\n"
 
     # GitHub 近15天
     github_news = [n for n in all_news if n["source"] == "github"]
     if github_news:
-        md += "## [星] GitHub 热门项目（近15天 star 最多）\n\n"
+        md += "## ⭐ GitHub 热门项目（近15天 star 最多）\n\n"
         for i, news in enumerate(github_news, 1):
-            star_str = f" [星]{news.get('hot_display', '')}" if news.get("hot_display") else ""
+            star_str = f" ⭐{news.get('hot_display', '')}" if news.get("hot_display") else ""
             lang_str = f" [{news['language']}]" if news.get("language") else ""
-            pushed = f" [更]{news.get('pushed_at_display', '')}" if news.get("pushed_at_display") else ""
+            pushed = f" 🕒{news.get('pushed_at_display', '')}" if news.get("pushed_at_display") else ""
             summary = summaries.get(news["title"], news.get("description", news["title"]))
-            md += f"**{i}. {news['title']}**{star_str}{lang_str}{pushed}\n{summary}\n[查看仓库]({news['url']})\n\n"
+            md += f"**{i}. {news['title']}**{star_str}{lang_str}{pushed}\n{summary}\n[🔗 查看仓库]({news['url']})\n\n"
 
         md += "---\n\n"
 
@@ -1025,13 +1025,13 @@ def generate_markdown(all_news, summaries, trending_keywords=None):
     github_yearly = [n for n in all_news if n["source"] == "github_yearly"]
     if github_yearly:
         year = datetime.now().year
-        md += f"## [冠] GitHub 年度热门（{year} star 最多）\n\n"
+        md += f"## 🏆 GitHub 年度热门（{year} star 最多）\n\n"
         for i, news in enumerate(github_yearly, 1):
-            star_str = f" [星]{news.get('hot_display', '')}" if news.get("hot_display") else ""
+            star_str = f" ⭐{news.get('hot_display', '')}" if news.get("hot_display") else ""
             lang_str = f" [{news['language']}]" if news.get("language") else ""
-            pushed = f" [更]{news.get('pushed_at_display', '')}" if news.get("pushed_at_display") else ""
+            pushed = f" 🕒{news.get('pushed_at_display', '')}" if news.get("pushed_at_display") else ""
             summary = summaries.get(news["title"], news.get("description", news["title"]))
-            md += f"**{i}. {news['title']}**{star_str}{lang_str}{pushed}\n{summary}\n[查看仓库]({news['url']})\n\n"
+            md += f"**{i}. {news['title']}**{star_str}{lang_str}{pushed}\n{summary}\n[🔗 查看仓库]({news['url']})\n\n"
 
         md += "---\n\n"
 
@@ -1040,7 +1040,7 @@ def generate_markdown(all_news, summaries, trending_keywords=None):
         platforms_kw = trending_keywords.get("platforms", {})
         total_days = trending_keywords.get("total_days", 1)
         
-        md += "## [搜] 近5天大家都在搜\n\n"
+        md += "## 🔍 近5天大家都在搜\n\n"
         md += "> 统计最近5天各平台热搜关键词出现频次，取前6个高频词\n\n"
 
         for sk, kw_list in platforms_kw.items():
@@ -1078,7 +1078,7 @@ def send_to_wechat(content):
     today = datetime.now().strftime("%Y年%m月%d日")
     weekdays = ["一", "二", "三", "四", "五", "六", "日"]
     weekday = weekdays[datetime.now().weekday()]
-    title = f"[日报] 每日新闻日报 - {today} 周{weekday}"
+    title = f"📰 每日新闻日报 - {today} 周{weekday}"
 
     payload = {
         "token": PUSHPLUS_TOKEN,
