@@ -35,7 +35,10 @@ jobs:
         env:
           PUSHPLUS_TOKEN: ${{ secrets.PUSHPLUS_TOKEN }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-        run: python news_cloud.py
+          QQ_EMAIL: ${{ secrets.QQ_EMAIL }}
+          QQ_AUTH_CODE: ${{ secrets.QQ_AUTH_CODE }}
+          QQ_TO_EMAIL: ${{ secrets.QQ_TO_EMAIL }}
+        run: pip install markdown && python news_cloud.py
 
       - name: 提交历史记录
         run: |

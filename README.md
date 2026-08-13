@@ -24,7 +24,7 @@ GitHub Actions 在云端服务器上每天定时运行 8 次 Python 脚本，自
     → DeepSeek AI 总结新闻（≤50字）
     → DeepSeek 批量翻译英文项目描述（Google Translate 兜底）
     → 抓取搜索关键词（QSLO/60s）→ 近5天频次统计
-    → 生成 Markdown 日报 → PushPlus 推送微信 → 提交历史记录
+    → 生成 Markdown 日报 → 推送微信 / QQ 邮箱（双通道可选）→ 提交历史记录
 ```
 
 ## 文件结构
@@ -74,10 +74,18 @@ news-daily/
 1. 点 **Settings** → 左侧 **Secrets and variables** → **Actions**
 2. 点 **New repository secret**
 
-**添加 PushPlus Token（必需）：**
+**添加 PushPlus Token（可选，原有推送通道）：**
 - Name: `PUSHPLUS_TOKEN`
 - Secret: 你的 PushPlus token
 - 点 **Add secret**
+- 说明：保留的原微信推送通道。**PushPlus 与 QQ 邮箱至少配置一个即可**。
+
+**添加 QQ 邮箱推送（可选，新增通道）：**
+- Name: `QQ_EMAIL` → 你的 QQ 邮箱（如 `123456@qq.com`）
+- Name: `QQ_AUTH_CODE` → 邮箱 SMTP 授权码（**不是登录密码**；QQ 邮箱网页版 → 设置 → 账户 → 开启 IMAP/SMTP 服务后获取）
+- Name: `QQ_TO_EMAIL`（可选）→ 收件人，留空则发给自己
+- 点 **Add secret**
+- 说明：邮件正文为 **HTML 排版**（自动把 Markdown 转成带样式的网页，已内置纯文本兜底）。依赖 `markdown` 包，workflow 已自动 `pip install markdown`，无需本地安装。
 
 **添加 DeepSeek API Key（可选，用于AI归纳总结+翻译）：**
 - Name: `DEEPSEEK_API_KEY`
@@ -180,8 +188,8 @@ GitHub 项目的 About(description) 处理逻辑：
 
 ## 注意事项
 
-- 仓库必须设为 **Private**，避免泄露 token
-- PushPlus token 和 DeepSeek key 都通过 GitHub Secrets 存储，不会泄露
+- 仓库必须设为 **Private**，避免泄露 token / 邮箱授权码
+- PushPlus token、QQ 邮箱授权码、DeepSeek key 都通过 GitHub Secrets 存储，不会泄露
 - 如果某天推送失败，历史记录不会更新，下次运行会重新尝试
 - `news_final.md` 是中间文件，推送成功后自动清理；如果仓库中存在该文件，说明上次推送可能失败
 - GitHub Actions 免费额度：公开仓库无限，私有仓库每月2000分钟（本任务每天约8分钟）

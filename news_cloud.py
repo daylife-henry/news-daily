@@ -30,6 +30,10 @@ import glob as glob_module
 import urllib.request
 import urllib.parse
 from datetime import datetime, timedelta
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.header import Header
 
 # ============================================================
 # 配置
@@ -37,6 +41,15 @@ from datetime import datetime, timedelta
 
 PUSHPLUS_TOKEN = os.environ.get("PUSHPLUS_TOKEN", "").strip()
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "").strip()
+# 2026-08-13 Henry
+# 新增 QQ 邮箱推送通道（标准库 smtplib，无需额外依赖）
+# 注意：QQ_AUTH_CODE 是邮箱 SMTP 授权码，不是登录密码
+#       （QQ 邮箱网页版 -> 设置 -> 账户 -> 开启 IMAP/SMTP 服务后获取）
+QQ_EMAIL     = os.environ.get("QQ_EMAIL", "").strip()      # 发件人 QQ 邮箱，如 123456@qq.com
+QQ_AUTH_CODE = os.environ.get("QQ_AUTH_CODE", "").strip()  # 邮箱 SMTP 授权码
+QQ_TO_EMAIL  = os.environ.get("QQ_TO_EMAIL", "").strip()   # 收件人，留空=发给自己
+QQ_SMTP_HOST = os.environ.get("QQ_SMTP_HOST", "smtp.qq.com").strip()
+QQ_SMTP_PORT = int(os.environ.get("QQ_SMTP_PORT", "465"))
 # 注意：deepseek-chat 已于 2026-07-24 停用，迁移至 deepseek-v4-flash（默认非思考模式）
 DEEPSEEK_MODEL = "deepseek-v4-flash"
 
@@ -1107,6 +1120,58 @@ def send_to_wechat(content):
         return False
 
 
+# 2026-08-13 Henry
+# 新增：QQ 邮箱 SMTP 推送通道（保留原 PushPlus 微信推送，双通道并行）
+# 邮件正文为 HTML 排版：把 Markdown 转成带样式的网页（依赖 markdown 包，workflow 已自动 pip install）
+def send_via_email(content):
+    if not (QQ_EMAIL and QQ_AUTH_CODE):
+        log("提示: QQ 邮箱未配置，跳过邮件推送")
+        return False
+
+    today = datetime.now().strftime("%Y年%m月%d日")
+    weekdays = ["一", "二", "三", "四", "五", "六", "日"]
+    weekday = weekdays[datetime.now().weekday()]
+    subject = f"📰 每日新闻日报 - {today} 周{weekday}"
+    to_addr = QQ_TO_EMAIL or QQ_EMAIL
+
+    # 优先转 HTML 排版；若 markdown 包不可用则降级为纯文本
+    html_body = None
+    try:
+        import markdown
+        html_body = markdown.markdown(content, extensions=["tables", "fenced_code"])
+    except Exception:
+        html_body = None
+
+    if html_body:
+        styled = (
+            '<div style="font-family:-apple-system,\'Microsoft YaHei\',\'PingFang SC\',sans-serif;'
+            'line-height:1.7;color:#222;max-width:720px;margin:0 auto;padding:16px;">'
+            f'{html_body}</div>'
+        )
+        msg = MIMEMultipart("alternative")
+        msg["From"] = QQ_EMAIL
+        msg["To"] = to_addr
+        msg["Subject"] = Header(subject, "utf-8")
+        msg.attach(MIMEText(content, "plain", "utf-8"))   # 纯文本兜底
+        msg.attach(MIMEText(styled, "html", "utf-8"))     # HTML 排版
+    else:
+        msg = MIMEText(content, "plain", "utf-8")
+        msg["From"] = QQ_EMAIL
+        msg["To"] = to_addr
+        msg["Subject"] = Header(subject, "utf-8")
+
+    try:
+        with smtplib.SMTP_SSL(QQ_SMTP_HOST, QQ_SMTP_PORT, timeout=30) as server:
+            server.login(QQ_EMAIL, QQ_AUTH_CODE)
+            server.sendmail(QQ_EMAIL, [to_addr], msg.as_string())
+        log("邮件推送成功!")
+        return True
+    except Exception as e:
+        log(f"邮件推送异常: {e}")
+        print(f"ERROR: Email send exception - {e}")
+        return False
+
+
 def cleanup_intermediate():
     """清理中间文件"""
     final_file = os.path.join(BASE_DIR, "news_final.md")
@@ -1123,11 +1188,12 @@ def main():
     log("=" * 60)
     log("GitHub Actions ��日新闻工作流启动")
     log(f"PushPlus Token: {'已配置' if PUSHPLUS_TOKEN else '未配置'}")
+    log(f"QQ 邮箱推送: {'已配置' if (QQ_EMAIL and QQ_AUTH_CODE) else '未配置'}")
     log(f"DeepSeek API Key: {'已配置' if DEEPSEEK_API_KEY else '未配置（将使用标题/description）'}")
     log("=" * 60)
 
-    if not PUSHPLUS_TOKEN:
-        print("ERROR: PUSHPLUS_TOKEN is not set. Please configure it in GitHub Secrets.")
+    if not PUSHPLUS_TOKEN and not (QQ_EMAIL and QQ_AUTH_CODE):
+        print("ERROR: 至少需配置一个推送通道 (PUSHPLUS_TOKEN 或 QQ_EMAIL+QQ_AUTH_CODE) in GitHub Secrets.")
         sys.exit(1)
 
     history = load_history()
@@ -1376,8 +1442,11 @@ def main():
         f.write(markdown)
     log(f"Markdown 已保存到 {output_file}")
 
-    # 推送到微信
-    success = send_to_wechat(markdown)
+    # 推送到微信（PushPlus）+ QQ 邮箱（双通道，任一成功即视为推送成功）
+    wechat_ok = send_to_wechat(markdown) if PUSHPLUS_TOKEN else False
+    email_ok = send_via_email(markdown) if (QQ_EMAIL and QQ_AUTH_CODE) else False
+    success = wechat_ok or email_ok
+    log(f"推送结果: 微信={wechat_ok}, 邮箱={email_ok}")
 
     if success:
         # 更新历��记录（年度热门不加入历史记录）
