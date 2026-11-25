@@ -1,636 +1,6 @@
 {
   "records": [
     {
-      "date": "2026-10-25",
-      "title": "台湾光复81周年",
-      "normalized_title": "台湾光复81周年",
-      "url": "https://www.douyin.com/search/%E5%8F%B0%E6%B9%BE%E5%85%89%E5%A4%8D81%E5%91%A8%E5%B9%B4?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "马刺122:106独行侠",
-      "normalized_title": "马刺122106独行侠",
-      "url": "https://www.douyin.com/search/%E9%A9%AC%E5%88%BA122%3A106%E7%8B%AC%E8%A1%8C%E4%BE%A0?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "致敬最可爱的人",
-      "normalized_title": "致敬最可爱的人",
-      "url": "https://www.douyin.com/search/%E8%87%B4%E6%95%AC%E6%9C%80%E5%8F%AF%E7%88%B1%E7%9A%84%E4%BA%BA?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "A股指数调整10月26日落地",
-      "normalized_title": "a股指数调整10月26日落地",
-      "url": "https://www.douyin.com/search/A%E8%82%A1%E6%8C%87%E6%95%B0%E8%B0%83%E6%95%B410%E6%9C%8826%E6%97%A5%E8%90%BD%E5%9C%B0?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "纪念抗美援朝出国作战76周年",
-      "normalized_title": "纪念抗美援朝出国作战76周年",
-      "url": "https://www.douyin.com/search/%E7%BA%AA%E5%BF%B5%E6%8A%97%E7%BE%8E%E6%8F%B4%E6%9C%9D%E5%87%BA%E5%9B%BD%E4%BD%9C%E6%88%9876%E5%91%A8%E5%B9%B4?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "苏超半决赛落幕",
-      "normalized_title": "苏超半决赛落幕",
-      "url": "https://www.douyin.com/search/%E8%8B%8F%E8%B6%85%E5%8D%8A%E5%86%B3%E8%B5%9B%E8%90%BD%E5%B9%95?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "张雪机车刷新水上漂吉尼斯纪录",
-      "normalized_title": "张雪机车刷新水上漂吉尼斯纪录",
-      "url": "https://www.douyin.com/search/%E5%BC%A0%E9%9B%AA%E6%9C%BA%E8%BD%A6%E5%88%B7%E6%96%B0%E6%B0%B4%E4%B8%8A%E6%BC%82%E5%90%89%E5%B0%BC%E6%96%AF%E7%BA%AA%E5%BD%95?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "亚锦赛半决赛蒯曼vs张本美和",
-      "normalized_title": "亚锦赛半决赛蒯曼vs张本美和",
-      "url": "https://www.douyin.com/search/%E4%BA%9A%E9%94%A6%E8%B5%9B%E5%8D%8A%E5%86%B3%E8%B5%9B%E8%92%AF%E6%9B%BCvs%E5%BC%A0%E6%9C%AC%E7%BE%8E%E5%92%8C?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "火箭险胜老鹰豪取三连胜",
-      "normalized_title": "火箭险胜老鹰豪取三连胜",
-      "url": "https://www.douyin.com/search/%E7%81%AB%E7%AE%AD%E9%99%A9%E8%83%9C%E8%80%81%E9%B9%B0%E8%B1%AA%E5%8F%96%E4%B8%89%E8%BF%9E%E8%83%9C?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "在九寨沟拍到野生水獭的含金量",
-      "normalized_title": "在九寨沟拍到野生水獭的含金量",
-      "url": "https://www.douyin.com/search/%E5%9C%A8%E4%B9%9D%E5%AF%A8%E6%B2%9F%E6%8B%8D%E5%88%B0%E9%87%8E%E7%94%9F%E6%B0%B4%E7%8D%AD%E7%9A%84%E5%90%AB%E9%87%91%E9%87%8F?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "张雪机车刷新水上漂吉尼斯世界纪录",
-      "normalized_title": "张雪机车刷新水上漂吉尼斯世界纪录",
-      "url": "https://www.toutiao.com/trending/7700435988002295305/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "稻城亚丁一游客疑高反失控冲下山坡",
-      "normalized_title": "稻城亚丁一游客疑高反失控冲下山坡",
-      "url": "https://www.toutiao.com/trending/7699750688184123446/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "超6万件套救援物资运往灾区",
-      "normalized_title": "超6万件套救援物资运往灾区",
-      "url": "https://www.toutiao.com/article/7700268366656717366",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "张雪：打99分留1分不要太骄傲",
-      "normalized_title": "张雪打99分留1分不要太骄傲",
-      "url": "https://www.toutiao.com/trending/7700453725483322890/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "泽连斯基：绝不接受放弃25%领土提议",
-      "normalized_title": "泽连斯基绝不接受放弃25%领土提议",
-      "url": "https://www.toutiao.com/trending/7699509225088745526/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "姑娘花3.8万在鹤岗买房入住后傻眼",
-      "normalized_title": "姑娘花38万在鹤岗买房入住后傻眼",
-      "url": "https://www.toutiao.com/trending/7700115642267844644/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "国考83个职位无人报名",
-      "normalized_title": "国考83个职位无人报名",
-      "url": "https://www.toutiao.com/trending/7699488753051631679/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "女儿跪地迎接抗美援朝烈士画像回家",
-      "normalized_title": "女儿跪地迎接抗美援朝烈士画像回家",
-      "url": "https://www.toutiao.com/trending/7699973670449872906/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "成都蓉城为何快成“笑话”了",
-      "normalized_title": "成都蓉城为何快成笑话了",
-      "url": "https://www.toutiao.com/trending/7700164112277962788/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "地震躲“生命三角”避险不靠谱",
-      "normalized_title": "地震躲生命三角避险不靠谱",
-      "url": "https://www.toutiao.com/trending/7699717741762887731/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "Zagitta/gpu-unlock",
-      "normalized_title": "zagitta/gpu-unlock",
-      "url": "https://github.com/Zagitta/gpu-unlock",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "Gathin23/cleanyourtv",
-      "normalized_title": "gathin23/cleanyourtv",
-      "url": "https://github.com/Gathin23/cleanyourtv",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "deepseek-ai/DeepInfer",
-      "normalized_title": "deepseek-ai/deepinfer",
-      "url": "https://github.com/deepseek-ai/DeepInfer",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "ly05010419/MacNativeGames",
-      "normalized_title": "ly05010419/macnativegames",
-      "url": "https://github.com/ly05010419/MacNativeGames",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "jhaizhou-ops/d2r-mobile",
-      "normalized_title": "jhaizhou-ops/d2r-mobile",
-      "url": "https://github.com/jhaizhou-ops/d2r-mobile",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "pengchujin/aerial-tv",
-      "normalized_title": "pengchujin/aerial-tv",
-      "url": "https://github.com/pengchujin/aerial-tv",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "simbasjungles/free-my-tv",
-      "normalized_title": "simbasjungles/free-my-tv",
-      "url": "https://github.com/simbasjungles/free-my-tv",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "HeyPuter/everything",
-      "normalized_title": "heyputer/everything",
-      "url": "https://github.com/HeyPuter/everything",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "onehumanbeing/esp32-iphone-agent",
-      "normalized_title": "onehumanbeing/esp32-iphone-agent",
-      "url": "https://github.com/onehumanbeing/esp32-iphone-agent",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "Arekejoker/qwen21-nsfw-pose-skill",
-      "normalized_title": "arekejoker/qwen21-nsfw-pose-skill",
-      "url": "https://github.com/Arekejoker/qwen21-nsfw-pose-skill",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "亚锦赛女单决赛陈熠VS张本美和",
-      "normalized_title": "亚锦赛女单决赛陈熠vs张本美和",
-      "url": "https://www.douyin.com/search/%E4%BA%9A%E9%94%A6%E8%B5%9B%E5%A5%B3%E5%8D%95%E5%86%B3%E8%B5%9B%E9%99%88%E7%86%A0VS%E5%BC%A0%E6%9C%AC%E7%BE%8E%E5%92%8C?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "直击西藏那曲地震救援一线",
-      "normalized_title": "直击西藏那曲地震救援一线",
-      "url": "https://www.douyin.com/search/%E7%9B%B4%E5%87%BB%E8%A5%BF%E8%97%8F%E9%82%A3%E6%9B%B2%E5%9C%B0%E9%9C%87%E6%95%91%E6%8F%B4%E4%B8%80%E7%BA%BF?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "奥巴马中期选举首秀抨击特朗普",
-      "normalized_title": "奥巴马中期选举首秀抨击特朗普",
-      "url": "https://www.douyin.com/search/%E5%A5%A5%E5%B7%B4%E9%A9%AC%E4%B8%AD%E6%9C%9F%E9%80%89%E4%B8%BE%E9%A6%96%E7%A7%80%E6%8A%A8%E5%87%BB%E7%89%B9%E6%9C%97%E6%99%AE?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "亚锦赛男单决赛李天阳vs张本智和",
-      "normalized_title": "亚锦赛男单决赛李天阳vs张本智和",
-      "url": "https://www.douyin.com/search/%E4%BA%9A%E9%94%A6%E8%B5%9B%E7%94%B7%E5%8D%95%E5%86%B3%E8%B5%9B%E6%9D%8E%E5%A4%A9%E9%98%B3vs%E5%BC%A0%E6%9C%AC%E6%99%BA%E5%92%8C?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "S16瑞士轮第二轮赛果",
-      "normalized_title": "s16瑞士轮第二轮赛果",
-      "url": "https://www.douyin.com/search/S16%E7%91%9E%E5%A3%AB%E8%BD%AE%E7%AC%AC%E4%BA%8C%E8%BD%AE%E8%B5%9B%E6%9E%9C?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "2026王者荣耀共创之夜",
-      "normalized_title": "2026王者荣耀共创之夜",
-      "url": "https://www.douyin.com/search/2026%E7%8E%8B%E8%80%85%E8%8D%A3%E8%80%80%E5%85%B1%E5%88%9B%E4%B9%8B%E5%A4%9C?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "TES战胜AL",
-      "normalized_title": "tes战胜al",
-      "url": "https://www.douyin.com/search/TES%E6%88%98%E8%83%9CAL?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "“地震生命三角区”不靠谱",
-      "normalized_title": "地震生命三角区不靠谱",
-      "url": "https://www.douyin.com/search/%E2%80%9C%E5%9C%B0%E9%9C%87%E7%94%9F%E5%91%BD%E4%B8%89%E8%A7%92%E5%8C%BA%E2%80%9D%E4%B8%8D%E9%9D%A0%E8%B0%B1?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "冷都女2.0穿搭参考",
-      "normalized_title": "冷都女20穿搭参考",
-      "url": "https://www.douyin.com/search/%E5%86%B7%E9%83%BD%E5%A5%B32.0%E7%A9%BF%E6%90%AD%E5%8F%82%E8%80%83?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "超级武将杯S2开赛",
-      "normalized_title": "超级武将杯s2开赛",
-      "url": "https://www.douyin.com/search/%E8%B6%85%E7%BA%A7%E6%AD%A6%E5%B0%86%E6%9D%AFS2%E5%BC%80%E8%B5%9B?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "人造黄金会不会击穿金价",
-      "normalized_title": "人造黄金会不会击穿金价",
-      "url": "https://www.toutiao.com/trending/7699776708773249067/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "县委书记回应被扔下水：张雪临时起意",
-      "normalized_title": "县委书记回应被扔下水张雪临时起意",
-      "url": "https://www.toutiao.com/trending/7700473698733588506/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "76年了，致敬最可爱的他们",
-      "normalized_title": "76年了致敬最可爱的他们",
-      "url": "https://www.toutiao.com/trending/7700376045093912595/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "奥巴马怒喷特朗普所为何事",
-      "normalized_title": "奥巴马怒喷特朗普所为何事",
-      "url": "https://www.toutiao.com/trending/7700572569123966502/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "陈熠横扫张本美和获亚锦赛女单冠军",
-      "normalized_title": "陈熠横扫张本美和获亚锦赛女单冠军",
-      "url": "https://www.toutiao.com/trending/7700579012128542235/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "全国总人口面临跌破14亿",
-      "normalized_title": "全国总人口面临跌破14亿",
-      "url": "https://www.toutiao.com/trending/7700498054662717478/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "林诗栋黄友政夺得亚锦赛男双冠军",
-      "normalized_title": "林诗栋黄友政夺得亚锦赛男双冠军",
-      "url": "https://www.toutiao.com/trending/7700569791739727410/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "张雪挑战成功后开香槟激动庆祝",
-      "normalized_title": "张雪挑战成功后开香槟激动庆祝",
-      "url": "https://www.toutiao.com/trending/7700514554324749862/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "安徽人口自然增长率低于全国均值",
-      "normalized_title": "安徽人口自然增长率低于全国均值",
-      "url": "https://www.toutiao.com/trending/7700133473658634250/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "蒯曼王艺迪夺亚锦赛女双冠军",
-      "normalized_title": "蒯曼王艺迪夺亚锦赛女双冠军",
-      "url": "https://www.toutiao.com/trending/7700557035607166514/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "Gathin23/cleanyourtv",
-      "normalized_title": "gathin23/cleanyourtv",
-      "url": "https://github.com/Gathin23/cleanyourtv",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "deepseek-ai/DeepInfer",
-      "normalized_title": "deepseek-ai/deepinfer",
-      "url": "https://github.com/deepseek-ai/DeepInfer",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "ly05010419/MacNativeGames",
-      "normalized_title": "ly05010419/macnativegames",
-      "url": "https://github.com/ly05010419/MacNativeGames",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "Zagitta/gpu-unlock",
-      "normalized_title": "zagitta/gpu-unlock",
-      "url": "https://github.com/Zagitta/gpu-unlock",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "pengchujin/aerial-tv",
-      "normalized_title": "pengchujin/aerial-tv",
-      "url": "https://github.com/pengchujin/aerial-tv",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "jhaizhou-ops/d2r-mobile",
-      "normalized_title": "jhaizhou-ops/d2r-mobile",
-      "url": "https://github.com/jhaizhou-ops/d2r-mobile",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "simbasjungles/free-my-tv",
-      "normalized_title": "simbasjungles/free-my-tv",
-      "url": "https://github.com/simbasjungles/free-my-tv",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "HeyPuter/everything",
-      "normalized_title": "heyputer/everything",
-      "url": "https://github.com/HeyPuter/everything",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "onehumanbeing/esp32-iphone-agent",
-      "normalized_title": "onehumanbeing/esp32-iphone-agent",
-      "url": "https://github.com/onehumanbeing/esp32-iphone-agent",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "Arekejoker/qwen21-nsfw-pose-skill",
-      "normalized_title": "arekejoker/qwen21-nsfw-pose-skill",
-      "url": "https://github.com/Arekejoker/qwen21-nsfw-pose-skill",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "陈熠3:0战胜张本美和夺冠",
-      "normalized_title": "陈熠30战胜张本美和夺冠",
-      "url": "https://www.douyin.com/search/%E9%99%88%E7%86%A03%3A0%E6%88%98%E8%83%9C%E5%BC%A0%E6%9C%AC%E7%BE%8E%E5%92%8C%E5%A4%BA%E5%86%A0?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "引江补汉工程有多硬核",
-      "normalized_title": "引江补汉工程有多硬核",
-      "url": "https://www.douyin.com/search/%E5%BC%95%E6%B1%9F%E8%A1%A5%E6%B1%89%E5%B7%A5%E7%A8%8B%E6%9C%89%E5%A4%9A%E7%A1%AC%E6%A0%B8?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "IG对战HLE",
-      "normalized_title": "ig对战hle",
-      "url": "https://www.douyin.com/search/IG%E5%AF%B9%E6%88%98HLE?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "新一股冷空气将影响长江以北大部",
-      "normalized_title": "新一股冷空气将影响长江以北大部",
-      "url": "https://www.douyin.com/search/%E6%96%B0%E4%B8%80%E8%82%A1%E5%86%B7%E7%A9%BA%E6%B0%94%E5%B0%86%E5%BD%B1%E5%93%8D%E9%95%BF%E6%B1%9F%E4%BB%A5%E5%8C%97%E5%A4%A7%E9%83%A8?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "意甲乌迪内斯vsAC米兰",
-      "normalized_title": "意甲乌迪内斯vsac米兰",
-      "url": "https://www.douyin.com/search/%E6%84%8F%E7%94%B2%E4%B9%8C%E8%BF%AA%E5%86%85%E6%96%AFvsAC%E7%B1%B3%E5%85%B0?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "三大因素致国际金价走低",
-      "normalized_title": "三大因素致国际金价走低",
-      "url": "https://www.douyin.com/search/%E4%B8%89%E5%A4%A7%E5%9B%A0%E7%B4%A0%E8%87%B4%E5%9B%BD%E9%99%85%E9%87%91%E4%BB%B7%E8%B5%B0%E4%BD%8E?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "在这里遇见盛大晴天",
-      "normalized_title": "在这里遇见盛大晴天",
-      "url": "https://www.douyin.com/search/%E5%9C%A8%E8%BF%99%E9%87%8C%E9%81%87%E8%A7%81%E7%9B%9B%E5%A4%A7%E6%99%B4%E5%A4%A9?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "于蕾任2027羊年春晚总导演",
-      "normalized_title": "于蕾任2027羊年春晚总导演",
-      "url": "https://www.douyin.com/search/%E4%BA%8E%E8%95%BE%E4%BB%BB2027%E7%BE%8A%E5%B9%B4%E6%98%A5%E6%99%9A%E6%80%BB%E5%AF%BC%E6%BC%94?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "横店微短剧之夜",
-      "normalized_title": "横店微短剧之夜",
-      "url": "https://www.douyin.com/search/%E6%A8%AA%E5%BA%97%E5%BE%AE%E7%9F%AD%E5%89%A7%E4%B9%8B%E5%A4%9C?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "赵露思工作室发了100张图",
-      "normalized_title": "赵露思工作室发了100张图",
-      "url": "https://www.douyin.com/search/%E8%B5%B5%E9%9C%B2%E6%80%9D%E5%B7%A5%E4%BD%9C%E5%AE%A4%E5%8F%91%E4%BA%86100%E5%BC%A0%E5%9B%BE?type=general",
-      "source": "douyin"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "国乒亚锦赛四冠收官",
-      "normalized_title": "国乒亚锦赛四冠收官",
-      "url": "https://www.toutiao.com/trending/7700437056199180351/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "“23:59:60”今后将不再出现",
-      "normalized_title": "235960今后将不再出现",
-      "url": "https://www.toutiao.com/trending/7698300945130390043/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "自家车上经常被鸟拉屎 男子确诊肺炎",
-      "normalized_title": "自家车上经常被鸟拉屎男子确诊肺炎",
-      "url": "https://www.toutiao.com/trending/7700386878260133951/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "武契奇：以负责任态度面对选举结果",
-      "normalized_title": "武契奇以负责任态度面对选举结果",
-      "url": "https://www.toutiao.com/trending/7700556456050917403/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "泰国警方披露中国女游客遇险案",
-      "normalized_title": "泰国警方披露中国女游客遇险案",
-      "url": "https://www.toutiao.com/trending/7700600957620683274/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "女子回应离婚12年接前婆婆一起生活",
-      "normalized_title": "女子回应离婚12年接前婆婆一起生活",
-      "url": "https://www.toutiao.com/trending/7700097025165459499/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "徐冬冬回应身材争议",
-      "normalized_title": "徐冬冬回应身材争议",
-      "url": "https://www.toutiao.com/trending/7700081825624342564/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "王正谱辞去河北省省长职务",
-      "normalized_title": "王正谱辞去河北省省长职务",
-      "url": "https://www.toutiao.com/trending/7700576896769180170/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "李天阳2-3张本智和",
-      "normalized_title": "李天阳2-3张本智和",
-      "url": "https://www.toutiao.com/trending/7700595461064805939/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "博主：热播日剧藏着高市对华新手段",
-      "normalized_title": "博主热播日剧藏着高市对华新手段",
-      "url": "https://www.toutiao.com/trending/7700577301964000809/",
-      "source": "toutiao"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "JustAResearcher/gpu-unlock-ada",
-      "normalized_title": "justaresearcher/gpu-unlock-ada",
-      "url": "https://github.com/JustAResearcher/gpu-unlock-ada",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "Gathin23/cleanyourtv",
-      "normalized_title": "gathin23/cleanyourtv",
-      "url": "https://github.com/Gathin23/cleanyourtv",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "deepseek-ai/DeepInfer",
-      "normalized_title": "deepseek-ai/deepinfer",
-      "url": "https://github.com/deepseek-ai/DeepInfer",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "Zagitta/gpu-unlock",
-      "normalized_title": "zagitta/gpu-unlock",
-      "url": "https://github.com/Zagitta/gpu-unlock",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "ly05010419/MacNativeGames",
-      "normalized_title": "ly05010419/macnativegames",
-      "url": "https://github.com/ly05010419/MacNativeGames",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "pengchujin/aerial-tv",
-      "normalized_title": "pengchujin/aerial-tv",
-      "url": "https://github.com/pengchujin/aerial-tv",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "jhaizhou-ops/d2r-mobile",
-      "normalized_title": "jhaizhou-ops/d2r-mobile",
-      "url": "https://github.com/jhaizhou-ops/d2r-mobile",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "simbasjungles/free-my-tv",
-      "normalized_title": "simbasjungles/free-my-tv",
-      "url": "https://github.com/simbasjungles/free-my-tv",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "onehumanbeing/esp32-iphone-agent",
-      "normalized_title": "onehumanbeing/esp32-iphone-agent",
-      "url": "https://github.com/onehumanbeing/esp32-iphone-agent",
-      "source": "github"
-    },
-    {
-      "date": "2026-10-25",
-      "title": "HeyPuter/everything",
-      "normalized_title": "heyputer/everything",
-      "url": "https://github.com/HeyPuter/everything",
-      "source": "github"
-    },
-    {
       "date": "2026-10-26",
       "title": "想和你去看赛里木湖的冬日浪漫",
       "normalized_title": "想和你去看赛里木湖的冬日浪漫",
@@ -19249,99 +18619,177 @@
       "normalized_title": "frigadehq/yogurt",
       "url": "https://github.com/FrigadeHQ/yogurt",
       "source": "github"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "欧冠曼城vs那不勒斯",
+      "normalized_title": "欧冠曼城vs那不勒斯",
+      "url": "https://www.douyin.com/search/%E6%AC%A7%E5%86%A0%E6%9B%BC%E5%9F%8Evs%E9%82%A3%E4%B8%8D%E5%8B%92%E6%96%AF?type=general",
+      "source": "douyin"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "欧冠阿森纳vs多特蒙德",
+      "normalized_title": "欧冠阿森纳vs多特蒙德",
+      "url": "https://www.douyin.com/search/%E6%AC%A7%E5%86%A0%E9%98%BF%E6%A3%AE%E7%BA%B3vs%E5%A4%9A%E7%89%B9%E8%92%99%E5%BE%B7?type=general",
+      "source": "douyin"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "黄仁勋这次回归价值几何",
+      "normalized_title": "黄仁勋这次回归价值几何",
+      "url": "https://www.douyin.com/search/%E9%BB%84%E4%BB%81%E5%8B%8B%E8%BF%99%E6%AC%A1%E5%9B%9E%E5%BD%92%E4%BB%B7%E5%80%BC%E5%87%A0%E4%BD%95?type=general",
+      "source": "douyin"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "七天七色变装挑战",
+      "normalized_title": "七天七色变装挑战",
+      "url": "https://www.douyin.com/search/%E4%B8%83%E5%A4%A9%E4%B8%83%E8%89%B2%E5%8F%98%E8%A3%85%E6%8C%91%E6%88%98?type=general",
+      "source": "douyin"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "复联5美队孩子长大了",
+      "normalized_title": "复联5美队孩子长大了",
+      "url": "https://www.douyin.com/search/%E5%A4%8D%E8%81%945%E7%BE%8E%E9%98%9F%E5%AD%A9%E5%AD%90%E9%95%BF%E5%A4%A7%E4%BA%86?type=general",
+      "source": "douyin"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "白小纯收藏了青稚手势舞歌曲",
+      "normalized_title": "白小纯收藏了青稚手势舞歌曲",
+      "url": "https://www.douyin.com/search/%E7%99%BD%E5%B0%8F%E7%BA%AF%E6%94%B6%E8%97%8F%E4%BA%86%E9%9D%92%E7%A8%9A%E6%89%8B%E5%8A%BF%E8%88%9E%E6%AD%8C%E6%9B%B2?type=general",
+      "source": "douyin"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "张馨予金色礼服美到挪不开眼",
+      "normalized_title": "张馨予金色礼服美到挪不开眼",
+      "url": "https://www.douyin.com/search/%E5%BC%A0%E9%A6%A8%E4%BA%88%E9%87%91%E8%89%B2%E7%A4%BC%E6%9C%8D%E7%BE%8E%E5%88%B0%E6%8C%AA%E4%B8%8D%E5%BC%80%E7%9C%BC?type=general",
+      "source": "douyin"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "和赵露思一起跳Kiss My Soul",
+      "normalized_title": "和赵露思一起跳kissmysoul",
+      "url": "https://www.douyin.com/search/%E5%92%8C%E8%B5%B5%E9%9C%B2%E6%80%9D%E4%B8%80%E8%B5%B7%E8%B7%B3Kiss%20My%20Soul?type=general",
+      "source": "douyin"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "面剂子宝宝飞吻太萌了",
+      "normalized_title": "面剂子宝宝飞吻太萌了",
+      "url": "https://www.douyin.com/search/%E9%9D%A2%E5%89%82%E5%AD%90%E5%AE%9D%E5%AE%9D%E9%A3%9E%E5%90%BB%E5%A4%AA%E8%90%8C%E4%BA%86?type=general",
+      "source": "douyin"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "三角洲黑伤刀皮3.0攻略",
+      "normalized_title": "三角洲黑伤刀皮30攻略",
+      "url": "https://www.douyin.com/search/%E4%B8%89%E8%A7%92%E6%B4%B2%E9%BB%91%E4%BC%A4%E5%88%80%E7%9A%AE3.0%E6%94%BB%E7%95%A5?type=general",
+      "source": "douyin"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "华为动态血糖仪将于12月11日开售",
+      "normalized_title": "华为动态血糖仪将于12月11日开售",
+      "url": "https://www.toutiao.com/trending/7711657411194913306/",
+      "source": "toutiao"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "吴昕被6岁小师傅叫奶奶当场愣住",
+      "normalized_title": "吴昕被6岁小师傅叫奶奶当场愣住",
+      "url": "https://www.toutiao.com/trending/7711282204948594738/",
+      "source": "toutiao"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "男子杀妻抛尸后伪装好女婿10年",
+      "normalized_title": "男子杀妻抛尸后伪装好女婿10年",
+      "url": "https://www.toutiao.com/trending/7711385556081214002/",
+      "source": "toutiao"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "东北大爷拿“花洒”浇出一个冰坡",
+      "normalized_title": "东北大爷拿花洒浇出一个冰坡",
+      "url": "https://www.toutiao.com/trending/7711706364296725030/",
+      "source": "toutiao"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "fxceless/victory-fork",
+      "normalized_title": "fxceless/victory-fork",
+      "url": "https://github.com/fxceless/victory-fork",
+      "source": "github"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "ubiquitarianism/leonida",
+      "normalized_title": "ubiquitarianism/leonida",
+      "url": "https://github.com/ubiquitarianism/leonida",
+      "source": "github"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "pierridotite/mobile-agent-testers",
+      "normalized_title": "pierridotite/mobile-agent-testers",
+      "url": "https://github.com/pierridotite/mobile-agent-testers",
+      "source": "github"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "R0Y00/Xbox2Windows",
+      "normalized_title": "r0y00/xbox2windows",
+      "url": "https://github.com/R0Y00/Xbox2Windows",
+      "source": "github"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "Marvisak/VIctory",
+      "normalized_title": "marvisak/victory",
+      "url": "https://github.com/Marvisak/VIctory",
+      "source": "github"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "erkamyaman/rust-anything",
+      "normalized_title": "erkamyaman/rust-anything",
+      "url": "https://github.com/erkamyaman/rust-anything",
+      "source": "github"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "xcl-dev/xcl",
+      "normalized_title": "xcl-dev/xcl",
+      "url": "https://github.com/xcl-dev/xcl",
+      "source": "github"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "deepseek-ai/chat-demo",
+      "normalized_title": "deepseek-ai/chat-demo",
+      "url": "https://github.com/deepseek-ai/chat-demo",
+      "source": "github"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "Hut-hzf/ung220z-tool",
+      "normalized_title": "hut-hzf/ung220z-tool",
+      "url": "https://github.com/Hut-hzf/ung220z-tool",
+      "source": "github"
+    },
+    {
+      "date": "2026-11-25",
+      "title": "EL4CTEO/fast-anything",
+      "normalized_title": "el4cteo/fast-anything",
+      "url": "https://github.com/EL4CTEO/fast-anything",
+      "source": "github"
     }
   ],
   "sent_titles": [
-    "台湾光复81周年",
-    "马刺122106独行侠",
-    "致敬最可爱的人",
-    "a股指数调整10月26日落地",
-    "纪念抗美援朝出国作战76周年",
-    "苏超半决赛落幕",
-    "张雪机车刷新水上漂吉尼斯纪录",
-    "亚锦赛半决赛蒯曼vs张本美和",
-    "火箭险胜老鹰豪取三连胜",
-    "在九寨沟拍到野生水獭的含金量",
-    "张雪机车刷新水上漂吉尼斯世界纪录",
-    "稻城亚丁一游客疑高反失控冲下山坡",
-    "超6万件套救援物资运往灾区",
-    "张雪打99分留1分不要太骄傲",
-    "泽连斯基绝不接受放弃25%领土提议",
-    "姑娘花38万在鹤岗买房入住后傻眼",
-    "国考83个职位无人报名",
-    "女儿跪地迎接抗美援朝烈士画像回家",
-    "成都蓉城为何快成笑话了",
-    "地震躲生命三角避险不靠谱",
-    "zagitta/gpu-unlock",
-    "gathin23/cleanyourtv",
-    "deepseek-ai/deepinfer",
-    "ly05010419/macnativegames",
-    "jhaizhou-ops/d2r-mobile",
-    "pengchujin/aerial-tv",
-    "simbasjungles/free-my-tv",
-    "heyputer/everything",
-    "onehumanbeing/esp32-iphone-agent",
-    "arekejoker/qwen21-nsfw-pose-skill",
-    "亚锦赛女单决赛陈熠vs张本美和",
-    "直击西藏那曲地震救援一线",
-    "奥巴马中期选举首秀抨击特朗普",
-    "亚锦赛男单决赛李天阳vs张本智和",
-    "s16瑞士轮第二轮赛果",
-    "2026王者荣耀共创之夜",
-    "tes战胜al",
-    "地震生命三角区不靠谱",
-    "冷都女20穿搭参考",
-    "超级武将杯s2开赛",
-    "人造黄金会不会击穿金价",
-    "县委书记回应被扔下水张雪临时起意",
-    "76年了致敬最可爱的他们",
-    "奥巴马怒喷特朗普所为何事",
-    "陈熠横扫张本美和获亚锦赛女单冠军",
-    "全国总人口面临跌破14亿",
-    "林诗栋黄友政夺得亚锦赛男双冠军",
-    "张雪挑战成功后开香槟激动庆祝",
-    "安徽人口自然增长率低于全国均值",
-    "蒯曼王艺迪夺亚锦赛女双冠军",
-    "gathin23/cleanyourtv",
-    "deepseek-ai/deepinfer",
-    "ly05010419/macnativegames",
-    "zagitta/gpu-unlock",
-    "pengchujin/aerial-tv",
-    "jhaizhou-ops/d2r-mobile",
-    "simbasjungles/free-my-tv",
-    "heyputer/everything",
-    "onehumanbeing/esp32-iphone-agent",
-    "arekejoker/qwen21-nsfw-pose-skill",
-    "陈熠30战胜张本美和夺冠",
-    "引江补汉工程有多硬核",
-    "ig对战hle",
-    "新一股冷空气将影响长江以北大部",
-    "意甲乌迪内斯vsac米兰",
-    "三大因素致国际金价走低",
-    "在这里遇见盛大晴天",
-    "于蕾任2027羊年春晚总导演",
-    "横店微短剧之夜",
-    "赵露思工作室发了100张图",
-    "国乒亚锦赛四冠收官",
-    "235960今后将不再出现",
-    "自家车上经常被鸟拉屎男子确诊肺炎",
-    "武契奇以负责任态度面对选举结果",
-    "泰国警方披露中国女游客遇险案",
-    "女子回应离婚12年接前婆婆一起生活",
-    "徐冬冬回应身材争议",
-    "王正谱辞去河北省省长职务",
-    "李天阳2-3张本智和",
-    "博主热播日剧藏着高市对华新手段",
-    "justaresearcher/gpu-unlock-ada",
-    "gathin23/cleanyourtv",
-    "deepseek-ai/deepinfer",
-    "zagitta/gpu-unlock",
-    "ly05010419/macnativegames",
-    "pengchujin/aerial-tv",
-    "jhaizhou-ops/d2r-mobile",
-    "simbasjungles/free-my-tv",
-    "onehumanbeing/esp32-iphone-agent",
-    "heyputer/everything",
     "想和你去看赛里木湖的冬日浪漫",
     "看祖国各地丰收景象",
     "跟着现在就出发玩转九寨沟",
@@ -22001,7 +21449,31 @@
     "xinatian/mroffice",
     "el4cteo/fast-anything",
     "afk-surf/xnulinux",
-    "frigadehq/yogurt"
+    "frigadehq/yogurt",
+    "欧冠曼城vs那不勒斯",
+    "欧冠阿森纳vs多特蒙德",
+    "黄仁勋这次回归价值几何",
+    "七天七色变装挑战",
+    "复联5美队孩子长大了",
+    "白小纯收藏了青稚手势舞歌曲",
+    "张馨予金色礼服美到挪不开眼",
+    "和赵露思一起跳kissmysoul",
+    "面剂子宝宝飞吻太萌了",
+    "三角洲黑伤刀皮30攻略",
+    "华为动态血糖仪将于12月11日开售",
+    "吴昕被6岁小师傅叫奶奶当场愣住",
+    "男子杀妻抛尸后伪装好女婿10年",
+    "东北大爷拿花洒浇出一个冰坡",
+    "fxceless/victory-fork",
+    "ubiquitarianism/leonida",
+    "pierridotite/mobile-agent-testers",
+    "r0y00/xbox2windows",
+    "marvisak/victory",
+    "erkamyaman/rust-anything",
+    "xcl-dev/xcl",
+    "deepseek-ai/chat-demo",
+    "hut-hzf/ung220z-tool",
+    "el4cteo/fast-anything"
   ],
   "search_keywords": [
     {
@@ -44823,6 +44295,286 @@
       "source_name": "今日头条",
       "keyword": "李在明走访看到白菜煎饼摊走不动了",
       "hot_value": 1260558
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "85秒回顾神24发射",
+      "hot_value": 12048824
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "神舟二十四号发射圆满成功",
+      "hot_value": 11083109
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "破晓逐梦披霞出征",
+      "hot_value": 11077723
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "魏建军谈学习胖东来感受",
+      "hot_value": 10992829
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "冰铲铲师傅有求必应",
+      "hot_value": 10291802
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "火影玩家的神临时刻",
+      "hot_value": 9143153
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "菲利克斯倒勾名场面太燃了",
+      "hot_value": 9122058
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "真正好吃的小破店在民间",
+      "hot_value": 9072923
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "交上我的新手第一妆",
+      "hot_value": 8789864
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "田秉毅出任国羽主教练",
+      "hot_value": 8667535
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "俄乌在顿巴斯多方向激烈交战",
+      "hot_value": 8300542
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "如何评价两京十五日",
+      "hot_value": 8133091
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "英国小哥在中国学京绣练地书",
+      "hot_value": 8039187
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "哈尔滨冰雪大世界像童话世界",
+      "hot_value": 8008766
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "OK了老铁 大山的孩子",
+      "hot_value": 7786581
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "啊 是丹东大草莓来了",
+      "hot_value": 7776615
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "去吧佛怒火莲",
+      "hot_value": 7766358
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "天赐天选之子杯开启报名",
+      "hot_value": 7766023
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "此刻的生活全瓜版预告",
+      "hot_value": 7746996
+    },
+    {
+      "date": "2026-11-25",
+      "source": "douyin",
+      "source_name": "抖音",
+      "keyword": "太阳照在我手上好干净",
+      "hot_value": 7745251
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "中外航天员实现首次“太空握手”",
+      "hot_value": 27945008
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "陈吉宁被查 上海：坚决拥护党中央决定",
+      "hot_value": 25285689
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "国货品牌高质量发展步伐坚实",
+      "hot_value": 22879438
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "伊朗总统在哈梅内伊墓前下跪致敬",
+      "hot_value": 20702171
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "《新闻联播》正在直播",
+      "hot_value": 18732099
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "猝死女教师最后朋友圈称被焦虑填满",
+      "hot_value": 16949504
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "火箭发射与朝霞同框浪漫壮美",
+      "hot_value": 15336546
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "安徽4岁走失男童找到已无生命体征",
+      "hot_value": 13877080
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "湖北高考文科状元自述相亲4次都失败",
+      "hot_value": 12556501
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "中国天宫还会接待哪些国家的航天员",
+      "hot_value": 11361592
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "“天津滨海新区试点免中考升学”不实",
+      "hot_value": 10280394
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "石川佳纯宣布结婚",
+      "hot_value": 9302085
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "17.91亿元出逃长鑫科技",
+      "hot_value": 8416874
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "宁德时代大跌超8%",
+      "hot_value": 7615903
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "每天喝一碗“开水冲鸡蛋”有何变化",
+      "hot_value": 6891154
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "巴基斯坦航天为何没落了",
+      "hot_value": 6235374
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "巴航天员接过太空小蛋糕深深闻了闻",
+      "hot_value": 5642000
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "超级厄尔尼诺发威 暴雪袭击日本",
+      "hot_value": 5105092
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "郎永淳首度回应从央视离职原因",
+      "hot_value": 4619278
+    },
+    {
+      "date": "2026-11-25",
+      "source": "toutiao",
+      "source_name": "今日头条",
+      "keyword": "巴基斯坦航天员说中国空间站我来了",
+      "hot_value": 4179696
     }
   ]
 }
